@@ -1,0 +1,26 @@
+{
+  "name": "viteplus-starter",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A starter for quick browser experiments, built on Vite+.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "vp build",
+    "check": "vp check",
+    "check:fix": "vp check --fix",
+    "clean": "rm -rf .vite-hooks/_ *.log coverage dist node_modules",
+    "dev": "vp dev",
+    "prepare": "vp config",
+    "preview": "vp preview",
+    "test": "vp test --passWithNoTests",
+    "test:watch": "vp test watch"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.0",
+    "vite-plus": "0.2.8"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
