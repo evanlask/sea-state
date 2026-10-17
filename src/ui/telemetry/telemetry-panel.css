@@ -1,0 +1,58 @@
+.telemetry-panel {
+  position: absolute;
+  top: 50%;
+  right: 1.25rem;
+  transform: translateY(-50%);
+  width: min(19rem, 28vw);
+  max-height: 60vh;
+  overflow: auto;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--panel-edge);
+  border-radius: 0.6rem;
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+  color: var(--ink);
+  font:
+    0.72rem/1.35 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  pointer-events: none;
+}
+
+.telemetry-panel h2 {
+  margin: 0 0 0.4rem;
+  font:
+    600 0.7rem/1 system-ui,
+    sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.telemetry-panel h3 {
+  margin: 0.55rem 0 0.2rem;
+  font:
+    600 0.65rem/1 system-ui,
+    sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.telemetry-panel dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.75rem;
+  margin: 0;
+}
+
+.telemetry-panel dt {
+  color: var(--ink-dim);
+}
+
+.telemetry-panel dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

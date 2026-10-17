@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "assets": {
+    "audio/loops/rain-deck.m4a": {
+      "bytes": 128134,
+      "sha256": "c22996f442e0be0270a37cb96a3440a04da3b03b54aa5c4c603b36eeb061e1b6",
+      "kind": "audio",
+      "sourceBytes": 3840044,
+      "loop": {
+        "start": 0.25,
+        "end": 20.25
+      }
+    },
+    "audio/loops/rain-deck.webm": {
+      "bytes": 100785,
+      "sha256": "240add605e975cd0f94c92fa62e5640297a2a7b2cf92aafb8e66493ac9fa6281",
+      "kind": "audio",
+      "sourceBytes": 3840044,
+      "loop": {
+        "start": 0.25,
+        "end": 20.25
+      }
+    },
+    "audio/loops/rain-water.m4a": {
+      "bytes": 116023,
+      "sha256": "9fbbecdd2bcbc8f5be3f05bce98f170fb020c5b3c4754e4f7f9acccc144d0141",
+      "kind": "audio",
+      "sourceBytes": 3456044,
+      "loop": {
+        "start": 0.25,
+        "end": 18.25
+      }
+    },
+    "audio/loops/rain-water.webm": {
+      "bytes": 73851,
+      "sha256": "e5da8cee520f54b1a66b7544b25ae02c5a83a8354cd84ff91437815f04a38064",
+      "kind": "audio",
+      "sourceBytes": 3456044,
+      "loop": {
+        "start": 0.25,
+        "end": 18.25
+      }
+    },
+    "audio/loops/sea-lap.m4a": {
+      "bytes": 177487,
+      "sha256": "e17a6350bc5219468d9948d19eeb397a85e52c771219bc16a7ff513448a60520",
+      "kind": "audio",
+      "sourceBytes": 5376044,
+      "loop": {
+        "start": 0.25,
+        "end": 28.25
+      }
+    },
+    "audio/loops/sea-lap.webm": {
+      "bytes": 108541,
+      "sha256": "18c79fc8608587fb6fb3274f176d9ba01cdc48d8dffc1f4506df791148e56f48",
+      "kind": "audio",
+      "sourceBytes": 5376044,
+      "loop": {
+        "start": 0.25,
+        "end": 28.25
+      }
+    },
+    "audio/loops/sea-roar.m4a": {
+      "bytes": 189895,
+      "sha256": "1c6b0137dc2b738e416598d9a4264cbda329562cf80f62d84e8d50010c11ef13",
+      "kind": "audio",
+      "sourceBytes": 5760044,
+      "loop": {
+        "start": 0.25,
+        "end": 30.25
+      }
+    },
+    "audio/loops/sea-roar.webm": {
+      "bytes": 121179,
+      "sha256": "60db6a5471dc630158632e0576492d8ad7f3b7938bf0671e07f456429bc6f4e1",
+      "kind": "audio",
+      "sourceBytes": 5760044,
+      "loop": {
+        "start": 0.25,
+        "end": 30.25
+      }
+    },
+    "audio/loops/sea-wash.m4a": {
+      "bytes": 127987,
+      "sha256": "0882ed8f54146fead033ba3a38ab93bb0756aad07f2f2e7c6f5929dfe797b2e9",
+      "kind": "audio",
+      "sourceBytes": 3840044,
+      "loop": {
+        "start": 0.25,
+        "end": 20.25
+      }
+    },
+    "audio/loops/sea-wash.webm": {
+      "bytes": 79986,
+      "sha256": "bb0a5fad1fa7dcc1d5d22af9a1f678e77d3fbd3495e06f2187f444c4333534af",
+      "kind": "audio",
+      "sourceBytes": 3840044,
+      "loop": {
+        "start": 0.25,
+        "end": 20.25
+      }
+    },
+    "data/stars.bin.gz": {
+      "bytes": 90323,
+      "sha256": "74f3bf4cf529c8b25f3ce87e6250cd5ece88199e78a12068513baf48927f9b78",
+      "kind": "data"
+    },
+    "models/characters/rider/credits.json": {
+      "bytes": 157,
+      "sha256": "61e7664eae5909d6141574a488435eb518a382af63455bad9ddd35d97ce5ef5b",
+      "kind": "credits",
+      "sourceBytes": 157
+    },
+    "models/characters/rider/model.glb": {
+      "bytes": 648100,
+      "sha256": "3315206ab653a547978e437779fc3d9d61a312072e12822ef827d7d2cd7d75af",
+      "kind": "model",
+      "sourceBytes": 15545276
+    },
+    "textures/deck-planks/color.ktx2": {
+      "bytes": 169821,
+      "sha256": "fdf8333fb8c818e6ad082c8417e1456eb0231431f0b2fc75225708e38fd08502",
+      "kind": "texture",
+      "sourceBytes": 910213
+    },
+    "textures/deck-planks/surface.ktx2": {
+      "bytes": 1031203,
+      "sha256": "dad5f5865f32d742e2da23d1c8b758d06e987b52fdb61c0589ad8d21341aac1a",
+      "kind": "texture",
+      "sourceBytes": 2442401
+    },
+    "textures/diamond-plate/surface.ktx2": {
+      "bytes": 301372,
+      "sha256": "926415b1bf38d827c29198ac494a37fc22ce60087b30147815cb3363d11efd41",
+      "kind": "texture",
+      "sourceBytes": 3369236
+    },
+    "textures/gelcoat/surface.ktx2": {
+      "bytes": 100726,
+      "sha256": "6e572c5afb4321eb1a6916d0477d4f1081ffcd6481744e7c7e4541a58d7f4ee8",
+      "kind": "texture",
+      "sourceBytes": 2194352
+    },
+    "textures/painted-metal-worn/surface.ktx2": {
+      "bytes": 336596,
+      "sha256": "1d20e9b6f159e64b2edc4a46082ffa18ce6e89169658c08436d59f2377bca9cf",
+      "kind": "texture",
+      "sourceBytes": 3967264
+    },
+    "textures/painted-metal/surface.ktx2": {
+      "bytes": 949103,
+      "sha256": "95b54ec12e3fb67a4b5b4ea7ea681bdd3fd58505687e6ef89458fb16b039b0a4",
+      "kind": "texture",
+      "sourceBytes": 2499917
+    },
+    "textures/rope/color.ktx2": {
+      "bytes": 28716,
+      "sha256": "4193025fede43fc6e5793c38f7a488dba36aba167c550476498124cb4e7d5da4",
+      "kind": "texture",
+      "sourceBytes": 527156
+    },
+    "textures/rope/surface.ktx2": {
+      "bytes": 88946,
+      "sha256": "9d6848d0dcf1a678c97ff5093581de64e52b98ae44025bb4306da3e96e61efc5",
+      "kind": "texture",
+      "sourceBytes": 1109190
+    },
+    "textures/rubber/surface.ktx2": {
+      "bytes": 59796,
+      "sha256": "0f5c48268bf089c15792541ae2de606f9b7bd5750480962546cc3d26a8fc7e22",
+      "kind": "texture",
+      "sourceBytes": 2905270
+    },
+    "textures/rusty-steel/color.ktx2": {
+      "bytes": 66106,
+      "sha256": "42fcf479b4f6670c42c3dbeac9f4d2cfcc210ec0123c418282acaf6ec5583177",
+      "kind": "texture",
+      "sourceBytes": 1829752
+    },
+    "textures/rusty-steel/surface.ktx2": {
+      "bytes": 320589,
+      "sha256": "77b5fc75b02e3dbc7d0a6e7dc047e7a17f68b622e9bb0383737e359859e41ce9",
+      "kind": "texture",
+      "sourceBytes": 3308102
+    },
+    "textures/sailcloth/surface.ktx2": {
+      "bytes": 152777,
+      "sha256": "bcca05b02b1811a03a00a9342325598b9425b17e8f6a805022c2fd169c1a802f",
+      "kind": "texture",
+      "sourceBytes": 3206234
+    }
+  }
+}

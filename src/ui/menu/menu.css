@@ -1,0 +1,1448 @@
+/* Menus: nautical glass panels over the live ocean. Same palette and type as the boot screen
+   (thin, widely tracked uppercase headings; CSS variables from base.css). Sizes are in em off a
+   root size that scales with the viewport, so 1280×720 and 4K keep the same composition. */
+
+.menu-root {
+  --menu-glass: linear-gradient(180deg, rgba(12, 32, 48, 0.8), rgba(6, 18, 29, 0.86));
+  --menu-line: var(--panel-edge, rgba(160, 205, 235, 0.18));
+  --menu-faint: rgba(160, 205, 235, 0.08);
+  --menu-ink: var(--ink, #e8f1f7);
+  --menu-dim: var(--ink-dim, rgba(232, 241, 247, 0.65));
+  --menu-accent: var(--accent, #6fc3ff);
+  --menu-accent-soft: rgba(111, 195, 255, 0.14);
+  --menu-radius: 0.9em;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  color: var(--menu-ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* 15 px at 1280 wide, ~30 px at 4K; height-bound so short windows don't overflow. */
+  font-size: clamp(13px, min(0.62vw + 7px, 1.25vh + 6px), 34px);
+  line-height: 1.45;
+  background: radial-gradient(120% 100% at 50% 40%, transparent 35%, rgba(3, 10, 17, 0.55) 100%);
+  -webkit-font-smoothing: antialiased;
+}
+
+.menu-root[hidden] {
+  display: none;
+}
+
+.menu-root.is-ingame {
+  background:
+    radial-gradient(120% 100% at 50% 40%, transparent 20%, rgba(3, 10, 17, 0.6) 100%), rgba(3, 10, 17, 0.35);
+}
+
+.menu-root *,
+.menu-root *::before,
+.menu-root *::after {
+  box-sizing: border-box;
+}
+
+.menu-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2.2em;
+  animation: menu-in 0.28s ease-out both;
+}
+
+.menu-screen[hidden] {
+  display: none;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Focus: native :focus-visible for keyboard, and every focus while a gamepad is driving. */
+
+.menu-root :focus {
+  outline: none;
+}
+
+.menu-root :focus-visible,
+.menu-root[data-input='gamepad'] :focus {
+  outline: 2px solid var(--menu-accent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 0.4em rgba(111, 195, 255, 0.16);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Buttons */
+
+.menu-root button {
+  font: inherit;
+  color: inherit;
+}
+
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 2.6em;
+  padding: 0.5em 1.4em;
+  border: 1px solid var(--menu-line);
+  border-radius: 999px;
+  background: rgba(8, 22, 34, 0.55);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.86em;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.menu-btn:hover:not([disabled]) {
+  border-color: var(--menu-accent);
+  background: var(--menu-accent-soft);
+}
+
+.menu-btn[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.menu-btn-primary {
+  border-color: rgba(111, 195, 255, 0.7);
+  background: linear-gradient(180deg, rgba(111, 195, 255, 0.32), rgba(111, 195, 255, 0.16));
+  font-weight: 600;
+}
+
+.menu-btn-primary:hover:not([disabled]) {
+  background: linear-gradient(180deg, rgba(111, 195, 255, 0.45), rgba(111, 195, 255, 0.24));
+}
+
+.menu-btn-ghost {
+  background: transparent;
+}
+
+.menu-btn-small {
+  min-height: 2.1em;
+  padding: 0.3em 1em;
+  font-size: 0.78em;
+}
+
+/* Button hints: keyboard names by default, pad buttons while a gamepad is in use. */
+.menu-glyph {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  padding: 0 0.4em;
+  border: 1px solid rgba(232, 241, 247, 0.35);
+  border-radius: 0.35em;
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  opacity: 0.85;
+}
+
+.menu-glyph-back::before {
+  content: 'Esc';
+}
+
+.menu-glyph-accept::before {
+  content: 'Enter';
+}
+
+.menu-root[data-input='gamepad'] .menu-glyph {
+  width: 1.7em;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.menu-root[data-input='gamepad'] .menu-glyph-back::before {
+  content: 'B';
+  color: #ff8a80;
+}
+
+.menu-root[data-input='gamepad'] .menu-glyph-accept::before {
+  content: 'A';
+  color: #8ef0b5;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Main and pause menus */
+
+.menu-screen-main,
+.menu-screen-pause {
+  place-items: center start;
+  padding-left: clamp(2em, 8vw, 12em);
+}
+
+.menu-version {
+  position: absolute;
+  right: 1.4em;
+  bottom: 1.1em;
+  margin: 0;
+  color: var(--menu-dim);
+  font-size: 0.8em;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.menu-main,
+.menu-pause {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.menu-logo {
+  margin: 0;
+  font-size: 4.6em;
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  text-shadow: 0 0.08em 0.6em rgba(0, 0, 0, 0.35);
+}
+
+.menu-tagline {
+  margin: 1.1em 0 2.6em;
+  color: var(--menu-dim);
+  letter-spacing: 0.06em;
+}
+
+.menu-main-items {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55em;
+  min-width: 18em;
+}
+
+.menu-main-items > .menu-btn,
+.menu-main-continue > .menu-btn {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 3em;
+  padding-left: 1.6em;
+  border-radius: 0.6em;
+  border-color: transparent;
+  background: linear-gradient(90deg, rgba(8, 24, 38, 0.72), rgba(8, 24, 38, 0.28));
+  font-size: 1em;
+  letter-spacing: 0.22em;
+  font-weight: 300;
+  backdrop-filter: blur(8px);
+}
+
+.menu-main-items > .menu-btn::before,
+.menu-main-continue > .menu-btn::before {
+  content: '';
+  width: 0.18em;
+  height: 1.2em;
+  margin-right: 0.4em;
+  border-radius: 1px;
+  background: rgba(232, 241, 247, 0.25);
+  transition:
+    background-color 0.15s,
+    transform 0.15s;
+}
+
+.menu-main-items > .menu-btn:hover::before,
+.menu-main-items > .menu-btn:focus-visible::before,
+.menu-root[data-input='gamepad'] .menu-main-items .menu-btn:focus::before,
+.menu-main-continue > .menu-btn:hover::before,
+.menu-main-continue > .menu-btn:focus-visible::before {
+  background: var(--menu-accent);
+  transform: scaleY(1.25);
+}
+
+.menu-main-items > .menu-btn-primary {
+  background: linear-gradient(90deg, rgba(111, 195, 255, 0.3), rgba(111, 195, 255, 0.06));
+  font-weight: 400;
+}
+
+.menu-main-items > .menu-btn-primary::before {
+  background: var(--menu-accent);
+}
+
+.menu-main-continue {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-main-continue[hidden] {
+  display: none;
+}
+
+.menu-main-detail {
+  padding: 0.25em 0 0.35em 2.6em;
+  color: var(--menu-dim);
+  font-size: 0.8em;
+  letter-spacing: 0.04em;
+}
+
+.menu-pause-title {
+  margin: 0.2em 0 1.4em;
+  font-size: 2.6em;
+  font-weight: 200;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Panels */
+
+.menu-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(78em, 100%);
+  max-height: 100%;
+  height: min(52em, 100%);
+  border: 1px solid var(--menu-line);
+  border-radius: calc(var(--menu-radius) * 1.3);
+  background: var(--menu-glass);
+  box-shadow:
+    0 1.5em 4em rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px) saturate(1.25);
+  overflow: hidden;
+}
+
+.menu-panel-narrow {
+  width: min(48em, 100%);
+}
+
+.menu-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1em 2em;
+  padding: 1.5em 2em 0;
+  border-bottom: 1px solid var(--menu-line);
+}
+
+.menu-panel-titles {
+  padding-bottom: 1em;
+}
+
+.menu-kicker {
+  color: var(--menu-accent);
+  font-size: 0.72em;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.menu-title {
+  margin: 0.15em 0 0;
+  font-size: 1.9em;
+  font-weight: 200;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.menu-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.6em 2em 1.6em;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160, 205, 235, 0.3) transparent;
+}
+
+/* Tabbed screens scroll inside the panels holder instead. */
+.menu-panel-body:has(> .menu-tab-panels) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.menu-tab-panels {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.6em 2em 1.6em;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160, 205, 235, 0.3) transparent;
+}
+
+.menu-tab-panel[hidden] {
+  display: none;
+}
+
+.menu-panel-footer {
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+  padding: 1em 2em;
+  border-top: 1px solid var(--menu-line);
+  background: rgba(3, 11, 18, 0.35);
+}
+
+.menu-footer-middle {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Tabs */
+
+.menu-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2em;
+  margin-bottom: -1px;
+}
+
+.menu-tab {
+  padding: 0.7em 1.1em 0.85em;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--menu-dim);
+  font-size: 0.82em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.menu-root .menu-tab:focus-visible,
+.menu-root[data-input='gamepad'] .menu-tab:focus {
+  outline-offset: -2px;
+  border-radius: 0.4em 0.4em 0 0;
+  box-shadow: none;
+}
+
+.menu-tab:hover {
+  color: var(--menu-ink);
+}
+
+.menu-tab[aria-selected='true'] {
+  border-bottom-color: var(--menu-accent);
+  color: var(--menu-ink);
+}
+
+.menu-tabs-hint {
+  align-self: center;
+  margin: 0 0 0.3em 0.8em;
+  color: rgba(232, 241, 247, 0.35);
+  font-size: 0.7em;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.menu-tabs-hint::before {
+  content: 'PgUp / PgDn';
+}
+
+.menu-root[data-input='gamepad'] .menu-tabs-hint::before {
+  content: 'LB / RB';
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Sections and fields */
+
+.menu-section {
+  margin-top: 1.4em;
+}
+
+.menu-section[hidden],
+.menu-root [hidden] {
+  display: none !important;
+}
+
+.menu-section-title {
+  margin: 0 0 0.8em;
+  color: var(--menu-dim);
+  font-size: 0.74em;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.menu-subhead {
+  margin: 1.2em 0 0.5em;
+  color: var(--menu-dim);
+  font-size: 0.72em;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.menu-field-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--menu-faint);
+}
+
+.menu-field-list > .menu-field {
+  border-bottom: 1px solid var(--menu-faint);
+}
+
+.menu-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(26em, 100%), 1fr));
+  gap: 0.2em 2.4em;
+}
+
+.menu-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.4em 1.6em;
+  padding: 0.7em 0;
+}
+
+.menu-field-wide {
+  grid-column: 1 / -1;
+}
+
+.menu-field-label {
+  font-size: 0.95em;
+}
+
+.menu-field-desc {
+  margin-top: 0.1em;
+  color: var(--menu-dim);
+  font-size: 0.8em;
+}
+
+.menu-field-hint {
+  margin-top: 0.15em;
+  color: var(--warn, #ffb648);
+  font-size: 0.74em;
+  opacity: 0.85;
+}
+
+.menu-field-control {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.menu-note {
+  margin: 0.6em 0;
+  color: var(--menu-dim);
+  font-size: 0.82em;
+}
+
+.menu-note:empty {
+  display: none;
+}
+
+.menu-note-warn {
+  color: var(--warn, #ffb648);
+}
+
+.menu-readout {
+  margin-top: 0.8em;
+  padding: 0.7em 1em;
+  border: 1px solid var(--menu-faint);
+  border-radius: 0.6em;
+  background: rgba(111, 195, 255, 0.06);
+  font-size: 0.86em;
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-prose {
+  max-width: 46em;
+  margin: 0 0 0.8em;
+  color: rgba(232, 241, 247, 0.85);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Controls: choice, slider, toggle, chips */
+
+.menu-choice {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.25em;
+  padding: 0.2em;
+  border: 1px solid var(--menu-faint);
+  border-radius: 999px;
+  background: rgba(3, 11, 18, 0.35);
+}
+
+.menu-choice-btn {
+  min-width: 3.2em;
+  padding: 0.35em 0.9em;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--menu-dim);
+  font-size: 0.82em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.menu-choice-btn:hover {
+  color: var(--menu-ink);
+}
+
+.menu-choice-btn[aria-checked='true'] {
+  border-color: rgba(111, 195, 255, 0.55);
+  background: rgba(111, 195, 255, 0.2);
+  color: var(--menu-ink);
+}
+
+.menu-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+}
+
+.menu-slider {
+  --fill: 50%;
+  width: 13em;
+  height: 1.6em;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.menu-slider::-webkit-slider-runnable-track {
+  height: 0.28em;
+  border-radius: 1em;
+  background: linear-gradient(90deg, var(--menu-accent) var(--fill), rgba(160, 205, 235, 0.18) var(--fill));
+}
+
+.menu-slider::-moz-range-track {
+  height: 0.28em;
+  border-radius: 1em;
+  background: linear-gradient(90deg, var(--menu-accent) var(--fill), rgba(160, 205, 235, 0.18) var(--fill));
+}
+
+.menu-slider::-webkit-slider-thumb {
+  width: 1.05em;
+  height: 1.05em;
+  margin-top: -0.385em;
+  border: 2px solid var(--menu-accent);
+  border-radius: 50%;
+  background: #0b2133;
+  appearance: none;
+}
+
+.menu-slider::-moz-range-thumb {
+  width: 0.9em;
+  height: 0.9em;
+  border: 2px solid var(--menu-accent);
+  border-radius: 50%;
+  background: #0b2133;
+}
+
+/* The slider's own focus ring hugs the track; a halo on the thumb reads better. */
+.menu-root .menu-slider:focus-visible,
+.menu-root[data-input='gamepad'] .menu-slider:focus {
+  outline-offset: 2px;
+  border-radius: 0.4em;
+}
+
+.menu-slider-value {
+  min-width: 5.6em;
+  color: var(--menu-ink);
+  font-size: 0.86em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.2em;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.menu-toggle-knob {
+  position: relative;
+  width: 2.6em;
+  height: 1.4em;
+  border: 1px solid var(--menu-line);
+  border-radius: 999px;
+  background: rgba(3, 11, 18, 0.5);
+  transition: background-color 0.15s;
+}
+
+.menu-toggle-knob::after {
+  content: '';
+  position: absolute;
+  top: 0.15em;
+  left: 0.15em;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background: rgba(232, 241, 247, 0.6);
+  transition: transform 0.15s;
+}
+
+.menu-toggle[aria-checked='true'] .menu-toggle-knob {
+  border-color: rgba(111, 195, 255, 0.6);
+  background: rgba(111, 195, 255, 0.35);
+}
+
+.menu-toggle[aria-checked='true'] .menu-toggle-knob::after {
+  background: #fff;
+  transform: translateX(1.2em);
+}
+
+.menu-toggle-text {
+  min-width: 2em;
+  color: var(--menu-dim);
+  font-size: 0.82em;
+  text-align: left;
+}
+
+.menu-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.menu-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  padding: 0.45em 1em;
+  border: 1px solid var(--menu-line);
+  border-radius: 999px;
+  background: rgba(3, 11, 18, 0.35);
+  font-size: 0.86em;
+  cursor: pointer;
+}
+
+.menu-chip:hover:not([disabled]) {
+  border-color: var(--menu-accent);
+}
+
+.menu-chip[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.menu-chip[aria-pressed='true'] {
+  border-color: rgba(111, 195, 255, 0.6);
+  background: rgba(111, 195, 255, 0.16);
+}
+
+.menu-check {
+  display: inline-grid;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+  border: 1px solid rgba(232, 241, 247, 0.5);
+  border-radius: 0.25em;
+  font-size: 0.9em;
+}
+
+.menu-chip[aria-pressed='true'] .menu-check {
+  border-color: var(--menu-accent);
+  background: var(--menu-accent);
+}
+
+.menu-chip[aria-pressed='true'] .menu-check::after {
+  content: '';
+  width: 0.5em;
+  height: 0.28em;
+  margin-top: -0.12em;
+  border-bottom: 2px solid #06121c;
+  border-left: 2px solid #06121c;
+  transform: rotate(-45deg);
+}
+
+.menu-plus {
+  color: var(--menu-accent);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Cards */
+
+.menu-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(15em, 100%), 1fr));
+  gap: 0.8em;
+}
+
+.menu-card-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(20em, 100%), 1fr));
+  gap: 0.8em;
+}
+
+.menu-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3em;
+  padding: 0.9em 1.1em 1em;
+  border: 1px solid var(--menu-faint);
+  border-radius: var(--menu-radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+
+.menu-card:hover:not([disabled]) {
+  border-color: rgba(111, 195, 255, 0.45);
+}
+
+.menu-card[aria-pressed='true'],
+.menu-card[aria-checked='true'] {
+  border-color: rgba(111, 195, 255, 0.75);
+  background: linear-gradient(180deg, rgba(111, 195, 255, 0.2), rgba(111, 195, 255, 0.07));
+}
+
+.menu-card[aria-pressed='true']::after,
+.menu-card[aria-checked='true']::after {
+  content: '';
+  position: absolute;
+  top: 0.85em;
+  right: 0.9em;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--menu-accent);
+  box-shadow: 0 0 0.6em var(--menu-accent);
+}
+
+.menu-card[disabled] {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.menu-card-large {
+  padding: 1.2em 1.4em 1.3em;
+}
+
+.menu-card-large .menu-card-title {
+  font-size: 1.25em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+
+.menu-card-kicker {
+  color: var(--menu-accent);
+  font-size: 0.68em;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.menu-card-title {
+  padding-right: 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.menu-card-sub {
+  color: rgba(232, 241, 247, 0.78);
+  font-size: 0.82em;
+}
+
+.menu-card-detail {
+  color: var(--menu-dim);
+  font-size: 0.74em;
+}
+
+.menu-weather-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(14em, 100%), 1fr));
+}
+
+.menu-weather-card.is-storm .menu-card-title::before {
+  content: '';
+  display: inline-block;
+  width: 0.45em;
+  height: 0.45em;
+  margin: 0 0.5em 0.12em 0;
+  border-radius: 50%;
+  background: var(--warn, #ffb648);
+}
+
+.menu-boat-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(19em, 100%), 1fr));
+}
+
+.menu-boat-card {
+  gap: 0.25em;
+}
+
+.menu-boat-art {
+  display: block;
+  width: 100%;
+  height: 3.4em;
+  margin: 0.6em 0 0.3em; /* room for masts drawn above the box */
+}
+
+.menu-boat-art svg {
+  width: 100%;
+  height: 100%;
+}
+
+.menu-boat-art .boat-shape {
+  fill: rgba(232, 241, 247, 0.82);
+}
+
+.menu-boat-art .boat-sea {
+  fill: rgba(111, 195, 255, 0.22);
+}
+
+.menu-boat-card[aria-pressed='true'] .boat-shape {
+  fill: #fff;
+}
+
+.menu-stats {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 0.05em 1em;
+  width: 100%;
+  margin: 0.5em 0 0.2em;
+  padding-top: 0.55em;
+  border-top: 1px solid var(--menu-faint);
+}
+
+.menu-stats dt {
+  grid-row: 1;
+  color: var(--menu-dim);
+  font-size: 0.64em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.menu-stats dd {
+  grid-row: 2;
+  margin: 0;
+  font-size: 0.84em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.menu-preset-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.7em;
+}
+
+.menu-preset[aria-disabled='true'] {
+  cursor: default;
+}
+
+.menu-preset .menu-card-title {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Setup footer summary */
+
+.menu-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em 0.4em;
+  font-size: 0.78em;
+}
+
+.menu-summary-item {
+  padding: 0.2em 0.7em;
+  border: 1px solid var(--menu-faint);
+  border-radius: 999px;
+  color: rgba(232, 241, 247, 0.85);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Tables (help, bests) */
+
+.menu-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88em;
+}
+
+.menu-table th {
+  padding: 0.5em 0.8em;
+  border-bottom: 1px solid var(--menu-line);
+  color: var(--menu-dim);
+  font-size: 0.78em;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.menu-table td {
+  padding: 0.55em 0.8em;
+  border-bottom: 1px solid var(--menu-faint);
+  vertical-align: top;
+}
+
+.menu-help-table {
+  table-layout: fixed;
+}
+
+.menu-help-table th:first-child {
+  width: 50%;
+}
+
+.menu-help-action {
+  font-weight: 500;
+}
+
+.menu-help-desc {
+  color: var(--menu-dim);
+  font-size: 0.86em;
+}
+
+.menu-keys {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.menu-keys kbd {
+  display: inline-block;
+  min-width: 1.8em;
+  padding: 0.12em 0.5em;
+  border: 1px solid rgba(232, 241, 247, 0.28);
+  border-bottom-width: 2px;
+  border-radius: 0.35em;
+  background: rgba(255, 255, 255, 0.05);
+  font: inherit;
+  font-size: 0.86em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.menu-keys-sep {
+  color: var(--menu-dim);
+  font-size: 0.8em;
+}
+
+.menu-help-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8em 1.2em;
+  margin-top: 1.2em;
+}
+
+.menu-help-picker .menu-choice {
+  justify-content: flex-start;
+}
+
+.menu-empty {
+  color: var(--menu-dim);
+  font-style: italic;
+}
+
+.menu-bests-table td:not(:first-child),
+.menu-bests-table th:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Articles (primers, tips) */
+
+.menu-articles {
+  columns: 2 30em;
+  column-gap: 3em;
+}
+
+.menu-articles {
+  padding-top: 1.4em;
+}
+
+.menu-articles > .menu-section {
+  margin: 0 0 1.6em;
+  break-inside: avoid;
+}
+
+.menu-readable {
+  border-radius: 0.5em;
+}
+
+.menu-points {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.45em 1.2em;
+  margin: 0.4em 0 0;
+  font-size: 0.92em;
+}
+
+.menu-points dt {
+  color: var(--menu-accent);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.menu-points dd {
+  margin: 0;
+  color: rgba(232, 241, 247, 0.85);
+}
+
+.menu-points dt[data-tone='port'] {
+  color: var(--port, #ff4d4d);
+}
+
+.menu-points dt[data-tone='starboard'] {
+  color: var(--starboard, #3ddc84);
+}
+
+.menu-points dt[data-tone='white'] {
+  color: #fff;
+}
+
+.menu-lights-diagram {
+  break-inside: avoid;
+  margin: 1.4em 0 0;
+  text-align: center;
+}
+
+.menu-lights-diagram svg {
+  width: min(17em, 100%);
+  height: auto;
+}
+
+.menu-lights-diagram .arc {
+  stroke: rgba(6, 18, 28, 0.9);
+  stroke-width: 1;
+}
+
+.menu-lights-diagram .arc-port {
+  fill: rgba(255, 77, 77, 0.45);
+}
+
+.menu-lights-diagram .arc-stbd {
+  fill: rgba(61, 220, 132, 0.42);
+}
+
+.menu-lights-diagram .arc-stern {
+  fill: rgba(255, 255, 255, 0.16);
+}
+
+.menu-lights-diagram .arc-mast {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.menu-lights-diagram .hull {
+  fill: #e8f1f7;
+}
+
+.menu-lights-diagram text {
+  fill: rgba(232, 241, 247, 0.9);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+}
+
+.menu-lights-diagram figcaption {
+  color: var(--menu-dim);
+  font-size: 0.78em;
+}
+
+.menu-tips {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2 26em;
+  column-gap: 3em;
+}
+
+.menu-tips li {
+  position: relative;
+  margin-bottom: 0.8em;
+  padding-left: 1.3em;
+  break-inside: avoid;
+  color: rgba(232, 241, 247, 0.88);
+}
+
+.menu-tips li::before {
+  content: '';
+  position: absolute;
+  top: 0.6em;
+  left: 0;
+  width: 0.4em;
+  height: 0.4em;
+  border-radius: 50%;
+  background: var(--menu-accent);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Settings, fleet, reset */
+
+.menu-reset-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.6em;
+}
+
+.menu-fleet-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu-fleet-item {
+  display: grid;
+  grid-template-columns: 6em minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1em;
+  padding: 0.6em 0.8em;
+  border: 1px solid transparent;
+  border-bottom-color: var(--menu-faint);
+  border-radius: 0.6em;
+}
+
+.menu-fleet-item.is-helm {
+  border-color: rgba(111, 195, 255, 0.4);
+  background: rgba(111, 195, 255, 0.08);
+}
+
+.menu-fleet-item .menu-boat-art {
+  height: 2.2em;
+  margin: 0;
+}
+
+.menu-fleet-pilot {
+  grid-column: 2 / -1;
+  font-size: 0.85em;
+}
+
+.menu-fleet-pilot .menu-chip[aria-pressed='true'] {
+  border-color: rgba(111, 195, 255, 0.7);
+  background: rgba(111, 195, 255, 0.18);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Confirm dialog */
+
+.menu-dialog-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 10, 17, 0.55);
+  animation: menu-in 0.2s ease-out both;
+}
+
+.menu-dialog {
+  width: min(30em, 92vw);
+  padding: 1.8em 2em 1.5em;
+  border: 1px solid var(--menu-line);
+  border-radius: calc(var(--menu-radius) * 1.3);
+  background: var(--menu-glass);
+  box-shadow: 0 1.5em 4em rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+}
+
+.menu-dialog-title {
+  margin: 0 0 0.7em;
+  font-size: 1.25em;
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.menu-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8em;
+  margin-top: 1.4em;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Settings: when a field applies (settings/applyMode.ts) */
+
+.menu-apply-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin-left: 0.7em;
+  padding: 0.05em 0.6em;
+  border: 1px solid var(--menu-line);
+  border-radius: 999px;
+  color: var(--menu-dim);
+  font-size: 0.68em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 0.12em;
+  white-space: nowrap;
+}
+
+.menu-apply-badge::before {
+  content: '';
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+}
+
+.menu-apply-rebuild {
+  border-color: rgba(255, 182, 72, 0.45);
+  color: var(--warn, #ffb648);
+}
+
+.menu-apply-rebuild::before {
+  background: var(--warn, #ffb648);
+}
+
+.menu-apply-nextVoyage {
+  border-color: rgba(111, 195, 255, 0.4);
+  color: var(--menu-accent);
+}
+
+.menu-apply-nextVoyage::before {
+  border: 1.5px solid var(--menu-accent);
+}
+
+.menu-apply-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em 1.4em;
+  margin: 0.4em 0 0.2em;
+  color: var(--menu-dim);
+  font-size: 0.82em;
+}
+
+.menu-apply-legend .menu-apply-badge {
+  margin-left: 0;
+  margin-right: 0.5em;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   "Applying graphics settings…" (ui/applyingOverlay.ts; outside .menu-root, so no menu variables) */
+
+.apply-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  /* Like the loading screen: the message a third of the way down. */
+  grid-template-rows: 1fr auto 2fr;
+  place-items: center;
+  /* Opaque, in the loading screen's colours: it hides the menus and the scene while the warm-up
+     behind it draws a part at a time. */
+  background: radial-gradient(120% 90% at 50% 0%, #17405f 0%, #0a2235 45%, #06121c 100%);
+  color: var(--ink, #e8f1f7);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: clamp(13px, min(0.62vw + 7px, 1.25vh + 6px), 34px);
+  pointer-events: all;
+  animation: menu-fade 0.15s ease-out both;
+}
+
+.apply-overlay[hidden] {
+  display: none;
+}
+
+.apply-overlay-card {
+  grid-row: 2;
+  display: grid;
+  justify-items: center;
+  gap: 0.9em;
+  width: min(30em, 92vw);
+  text-align: center;
+}
+
+.apply-overlay-spinner {
+  width: 1.8em;
+  height: 1.8em;
+  border: 2px solid rgba(160, 205, 235, 0.18);
+  border-top-color: var(--accent, #6fc3ff);
+  border-radius: 50%;
+  animation: apply-spin 0.9s linear infinite;
+}
+
+.apply-overlay-title {
+  font-size: 1.5em;
+  font-weight: 200;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.apply-overlay-note {
+  color: var(--ink-dim, rgba(232, 241, 247, 0.65));
+  font-size: 0.9em;
+  letter-spacing: 0.04em;
+}
+
+@keyframes apply-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Smaller windows */
+
+@media (max-width: 900px), (max-height: 560px) {
+  .menu-screen {
+    padding: 0.8em;
+  }
+
+  .menu-panel {
+    height: 100%;
+  }
+
+  .menu-panel-header,
+  .menu-panel-footer {
+    padding-left: 1.2em;
+    padding-right: 1.2em;
+  }
+
+  .menu-tab-panels,
+  .menu-panel-body {
+    padding-left: 1.2em;
+    padding-right: 1.2em;
+  }
+
+  .menu-preset-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .menu-tabs {
+    overflow-x: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-screen,
+  .menu-dialog-layer {
+    animation-name: menu-fade;
+  }
+
+  .menu-root *,
+  .menu-root *::before,
+  .menu-root *::after {
+    transition-duration: 0s !important;
+  }
+}
+
+@keyframes menu-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.menu-region-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(12em, 100%), 1fr));
+}

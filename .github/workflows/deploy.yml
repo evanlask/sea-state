@@ -40,6 +40,9 @@ jobs:
       - name: Check
         run: npm run check
 
+      - name: Type-check scripts
+        run: npm run check:scripts
+
       - name: Test
         run: npm run test
 

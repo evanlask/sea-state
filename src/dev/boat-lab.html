@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>Sea State — boat lab</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #000;
+        color: #dfe8ee;
+        font:
+          12px/1.35 system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+        overflow: hidden;
+      }
+      #view {
+        position: fixed;
+        inset: 0;
+      }
+      #view canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #panel {
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        width: 270px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        background: rgba(8, 14, 20, 0.78);
+        backdrop-filter: blur(4px);
+      }
+      #panel.hidden {
+        display: none;
+      }
+      #panel h1 {
+        margin: 0 0 6px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 70px 1fr 46px;
+        align-items: center;
+        gap: 6px;
+        margin: 3px 0;
+      }
+      .row input[type='range'] {
+        width: 100%;
+      }
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 4px 0;
+      }
+      button,
+      select {
+        background: #1d2b36;
+        color: inherit;
+        border: 1px solid #2f4352;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font: inherit;
+      }
+      #readout {
+        white-space: pre;
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 11px;
+        margin-top: 6px;
+      }
+    </style>
+    <script type="module" src="./boatLab.ts"></script>
+  </head>
+  <body>
+    <div id="view"></div>
+    <div id="panel">
+      <h1>Boat lab</h1>
+      <div id="controls"></div>
+      <div class="buttons" id="cams"></div>
+      <div id="readout"></div>
+    </div>
+  </body>
+</html>

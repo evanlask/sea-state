@@ -36,3 +36,10 @@ coverage
 
 # macOS
 .DS_Store
+.vitest/
+
+# Agent worktrees (each is a separate checkout)
+.claude/worktrees/
+
+# Raw asset sources for `npm run assets` (never committed)
+assets-src/

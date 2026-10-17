@@ -1,0 +1,35 @@
+/* Player-facing FPS counter: a small dark-glass chip right-aligned under the HUD's conditions
+   panel (FpsCounter sets --fps-top to the panel's bottom edge), or in the top-right corner when the
+   HUD is off. Sized off the same root as the HUD (times --hud-scale). Never intercepts input. */
+
+.fps-counter {
+  --hud-scale: 1;
+  position: absolute;
+  /* 0.4 HUD em below the panel, else 1.1 HUD em from the corner; aligned with the panel's right
+     edge at 1.1 HUD em (this chip's em is 80% of the HUD's). */
+  top: calc(var(--fps-top, 0.875em) + 0.5em);
+  right: 1.375em;
+  z-index: 21;
+  padding: 0.2em 0.65em;
+  border: 1px solid var(--panel-edge, rgba(160, 205, 235, 0.18));
+  border-radius: 0.5em;
+  background: linear-gradient(180deg, rgba(17, 40, 58, 0.8), var(--panel, rgba(8, 22, 34, 0.72)));
+  color: var(--ink-dim, rgba(232, 241, 247, 0.65));
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* 80% of the HUD's root size (hud.css). */
+  font-size: calc(0.8 * var(--hud-scale) * clamp(10px, min(1.42vmin, 100vw / 98), 34px));
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ui-root > .fps-counter {
+  pointer-events: none;
+}
+
+.fps-counter[hidden] {
+  display: none;
+}

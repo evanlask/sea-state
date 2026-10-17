@@ -1,0 +1,31 @@
+/* F3 performance overlay: compact, top-left, above the loading screen, never intercepts input. */
+
+.perf-overlay {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 6px 9px;
+  border: 1px solid var(--panel-edge, rgba(160, 205, 235, 0.18));
+  border-radius: 6px;
+  background: var(--panel, rgba(8, 22, 34, 0.72));
+  color: var(--ink, #e8f1f7);
+  pointer-events: none;
+  user-select: none;
+}
+
+.perf-overlay[hidden] {
+  display: none;
+}
+
+.perf-overlay pre {
+  margin: 0;
+  font:
+    11px/1.35 ui-monospace,
+    'SF Mono',
+    Menlo,
+    Consolas,
+    monospace;
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+}

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Sea State — Audio lab</title>
+    <link rel="icon" href="data:," />
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #06121c;
+        color: #e8f1f7;
+        font:
+          12px/1.4 system-ui,
+          sans-serif;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 320px 320px 1fr;
+        gap: 12px;
+        padding: 12px;
+      }
+      section {
+        padding: 8px 10px;
+        border-radius: 6px;
+        background: rgb(255 255 255 / 0.05);
+        margin-bottom: 10px;
+      }
+      h2 {
+        margin: 0 0 6px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.7;
+      }
+      label {
+        display: grid;
+        grid-template-columns: 96px 1fr 52px;
+        align-items: center;
+        gap: 6px;
+        margin: 2px 0;
+      }
+      label.check {
+        display: flex;
+      }
+      input[type='range'] {
+        width: 100%;
+      }
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 6px;
+      }
+      button {
+        font: inherit;
+        padding: 4px 8px;
+      }
+      #unlock {
+        font-size: 14px;
+        padding: 8px 14px;
+      }
+      #readout {
+        font-family: ui-monospace, monospace;
+        white-space: pre;
+        font-size: 11px;
+      }
+      .meter {
+        height: 8px;
+        background: #13324a;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 4px 0;
+      }
+      .meter > div {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #3bb273, #e1bc29 75%, #e15554);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div id="col-a"></div>
+      <div id="col-b"></div>
+      <div>
+        <section>
+          <h2>Engine</h2>
+          <button id="unlock">Unlock audio</button>
+          <div>Pre-limiter peak</div>
+          <div class="meter"><div id="meter-pre"></div></div>
+          <div>Output peak</div>
+          <div class="meter"><div id="meter-post"></div></div>
+        </section>
+        <section><div id="readout"></div></section>
+      </div>
+    </main>
+    <script type="module" src="./audioLab.ts"></script>
+  </body>
+</html>

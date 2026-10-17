@@ -1,120 +1,101 @@
-# viteplus-starter
+# Sea State
 
-A minimal starter for quick browser experiments, built on [Vite+](https://viteplus.dev).
-TypeScript is set up and ready, but plain JavaScript works just as well.
+**Sail seven real-world boats through any weather, from glassy calm to a Category 5 hurricane, in your browser.**
 
-Everything comes from one dependency. Vite+ bundles the dev server and bundler
-(Vite 8 + Rolldown), the test runner (Vitest), the linter (Oxlint), the formatter
-(Oxfmt), the type checker (tsgolint) and the commit-hook runner — so there is no
-ESLint, Prettier, husky or lint-staged to install or configure.
+Sea State is an ocean, weather and boat simulator built on [three.js](https://threejs.org) and WebGPU. Pick a boat, a region, the weather and a time of day, then take the helm. You can also put a whole fleet on the water and see how each boat handles the same sea.
 
-## Quick start
+![Four scenes: a calm Mediterranean morning under sail, a Caribbean sunset, a crab boat in a Bering Sea gale, and a moonlit night sail](docs/screenshots/weather-grid.jpg)
 
-Needs Node 24 (see `.node-version`). The `vp` CLI ships as a real binary in
-`node_modules/.bin`, so there is nothing to install globally.
+**Play it:** <https://evanlask.github.io/sea-state/>
+
+**Needs WebGPU:** a current Chrome or Edge, Safari 26+, or Firefox on Windows and Apple Silicon Macs. There is no WebGL fallback.
+
+## The boats
+
+| Boat               | Modelled on                        |
+| ------------------ | ---------------------------------- |
+| MV Meridian Trader | 3,600 TEU Panamax container ship   |
+| MS Celestine       | Solstice-class cruise ship         |
+| F/V Northern Reach | 125 ft Bering Sea crab boat        |
+| Kittiwake          | C&C 115 sailboat                   |
+| Tidewater 33       | 33 ft twin-outboard center console |
+| Sea Dart RX        | 325 hp jet ski                     |
+| U-7 Sea Fury       | H1 Unlimited hydroplane (200 mph)  |
+
+## Features
+
+- **Ocean:** an FFT ocean with whitecaps, foam, spray and boat wakes. The physics runs on the same waves you see.
+- **Sky and weather:** a physically based sky with the real sun, moon and stars, volumetric clouds, rain, fog, lightning and the odd jet contrail. There are 15 weather presets, or set the wind and sea yourself.
+- **Regions:** the Caribbean, North Atlantic, Bering Sea, Mediterranean, Southern Ocean and Arctic, each with its own sky, season, water colour, typical weather and swell.
+- **Boat physics:** calibrated to real top speeds, turning circles and stopping distances. Boats ship water, flood and capsize.
+- **Two physics modes:** **Arcade** (the default) answers the helm in seconds. **Realistic** keeps real masses and response times and adds an engineering telemetry panel.
+- **Fleet mode:** several boats on the water at once, with autopilots and collisions.
+- **Night:** COLREG navigation lights and signals, deck floods, lit cabins and searchlights.
+- **Cameras:** helm, chase, orbit, hull, drone and cinematic, plus a photo mode with depth of field.
+- **Storm Survival:** stay upright through a storm for as long as you can.
+- **Sound:** synthesized engines, wind and thunder, with CC0 field recordings of the sea and rain.
+- **Input:** keyboard, mouse and gamepad.
+
+## Controls
+
+| Action                           | Key                      |
+| -------------------------------- | ------------------------ |
+| Throttle / telegraph / mainsheet | W / S                    |
+| Steer                            | A / D                    |
+| Center the rudder                | X                        |
+| Thruster / trim / wing / jib     | Q / E                    |
+| Brake, all stop, throttle off    | Space                    |
+| Let fly (sailboat)               | Space                    |
+| Camera                           | C / V, mouse, Z to reset |
+| Photo mode                       | K                        |
+| Lights: nav / deck / cabin       | 1 / 2 / 3 (or N / L)     |
+| Lights: signals / extras         | 4 / 5                    |
+| Switch boat                      | Tab                      |
+| Horn                             | B                        |
+| Recover a capsized boat          | Backspace                |
+| HUD / help / pause               | H / F1 / Esc             |
+
+In Arcade the steering centres itself when you let go; in Realistic the rudder stays where you leave it. The in-game Help screen lists every control for each boat, gamepad included.
+
+## Run it locally
+
+Requires Node 24.11 or newer.
 
 ```sh
 npm install
 npm run dev
 ```
 
-| Script               | What it does                            |
-| -------------------- | --------------------------------------- |
-| `npm run build`      | Production build into `dist/`           |
-| `npm run check`      | Format, lint and type-check in one pass |
-| `npm run check:fix`  | Same, but writes fixes                  |
-| `npm run clean`      | Remove everything generated             |
-| `npm run dev`        | Dev server with HMR                     |
-| `npm run preview`    | Serve the built output                  |
-| `npm run test`       | Run tests once                          |
-| `npm run test:watch` | Run tests in watch mode                 |
+| Script                  | What it does                         |
+| ----------------------- | ------------------------------------ |
+| `npm run dev`           | Dev server with hot reload           |
+| `npm run build`         | Production build into `dist/`        |
+| `npm run preview`       | Serve the production build           |
+| `npm run check`         | Format, lint and type-check          |
+| `npm run check:scripts` | Type-check the tooling in `scripts/` |
+| `npm run test`          | Unit tests                           |
 
-`check` covers type checking too, so there is no separate `typecheck` script.
-`clean` removes `node_modules` along with the build output, so follow it with
-`npm install`.
+Pull requests run check, test and build in CI. Pushes to `main` deploy to GitHub Pages.
 
-## Layout
+### Opening a scenario from the URL
+
+Any scenario can be opened straight from the URL, which makes screenshots repeatable:
 
 ```
-.
-├── public/          Copied to dist/ untouched
-├── src/
-│   ├── index.html   Entry point — the Vite root is src/, not the repo root
-│   ├── main.ts
-│   ├── counter.ts
-│   ├── counter.test.ts
-│   └── style.css
-├── vite.config.ts   Dev/build, format, lint, test and pre-commit config
-└── tsconfig.json
+?boat=sail&weather=gale&time=18:30&region=bering-sea&cam=chase&physics=realistic&seed=1
 ```
 
-`index.html` lives in `src/` so the repo root holds only configuration, which is
-why `vite.config.ts` sets `root: 'src'`, `publicDir: '../public'` and
-`build.outDir: '../dist'`.
+Add `debug` for a tuning panel and console hooks. The address bar never changes during normal play.
 
-## Configuration
+## How it's built
 
-`vite.config.ts` is the single source of truth — formatting, linting, tests and
-staged-file checks are all blocks in that one file. Keep them there: `vp` ignores
-`.oxlintrc.json` and `.oxfmtrc.json` entirely, and while a `vitest.config.ts`
-_is_ read, it silently overrides the `test` block. Two traps worth knowing:
+- **Simulation** (`src/sim/`): the sea, weather, astronomy, boat hydrodynamics and sail model, run in a Web Worker at a fixed step. Plain TypeScript with no rendering dependencies.
+- **Rendering** (`src/render/`): three.js WebGPU with TSL shaders: the FFT ocean, atmosphere, clouds, particles, post-processing and the procedural boat models.
+- **App** (`src/app/`, `src/ui/`, `src/input/`, `src/camera/`, `src/audio/`): the menu and loading flow, HUD, controls, cameras and sound.
+- **Assets** (`scripts/assets/`): `npm run assets` optimizes raw textures, models and audio into `public/` (KTX2, Meshopt, Opus/AAC) and writes the asset manifest.
 
-- A `plugins` array in the `lint` block **replaces** the defaults (`unicorn`,
-  `oxc`, `typescript`) rather than extending them. List those too.
-- `compilerOptions.baseUrl` in `tsconfig.json` silently disables type-aware
-  linting and type checking. For aliases, use `paths` without `baseUrl`.
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) has the rest: every URL key, the asset pipeline, using your own boat model, and the code layout. [TODO.md](TODO.md) lists planned work.
 
-Vite+ is in beta and has shipped breaking changes in patch releases, so
-`vite-plus` is pinned exactly. Move it with `npx vp upgrade`.
+## License
 
-## Tests
-
-Tests sit next to the code they cover as `*.test.ts`. Import helpers from
-`vite-plus/test`, **not** `vitest` — a lint rule flags the wrong one:
-
-```ts
-import { describe, expect, it } from 'vite-plus/test';
-```
-
-## Using JavaScript instead of TypeScript
-
-Nothing here is TypeScript-only, and mixing the two is fine. To drop to plain JS:
-
-1. Rename the `.ts` files to `.js` (`allowJs` is already on).
-2. Update the `<script type="module" src="/main.ts">` tag in `src/index.html`.
-3. Widen the test glob in `vite.config.ts` to `['**/*.test.{js,ts}']`.
-
-## Commit hooks
-
-`.vite-hooks/pre-commit` runs `vp staged`, which formats and autofixes staged
-files, re-stages the result, and fails the commit on anything it cannot fix. The
-dispatcher installs itself on `npm install` via the `prepare` script. Commit the
-`pre-commit` file; the generated `.vite-hooks/_/` directory ignores itself.
-
-To skip the hook for one commit:
-
-```sh
-VP_GIT_HOOKS=0 git commit -m "wip"
-```
-
-## Continuous integration
-
-`.github/workflows/ci.yml` runs check, test and build on every pull request and
-on pushes to any branch except `main`.
-
-## Deploying to GitHub Pages
-
-`.github/workflows/deploy.yml` runs the same checks and then deploys, on every
-push to `main`. It needs one manual step in the new repo: **Settings → Pages →
-Source: GitHub Actions**.
-
-The build uses a relative `base`, so it works both at a project subpath
-(`user.github.io/repo-name/`) and at a domain root with no config change.
-
-## After copying this template
-
-- [ ] `npm install`, then commit the `package-lock.json` it generates — CI runs
-      `npm ci` and needs one
-- [ ] Update `name`, `description` and `license` in `package.json`
-- [ ] Enable GitHub Pages (see above)
-- [ ] Replace this README
+[MIT](LICENSE). Bundled third-party assets keep their own licenses: see [CREDITS.md](CREDITS.md).

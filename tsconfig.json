@@ -14,7 +14,6 @@
     "moduleDetection": "force",
     "noEmit": true,
 
-    /* Plain .js files are first-class here, so you can drop TypeScript at any time. */
     "allowJs": true,
 
     /* Linting */

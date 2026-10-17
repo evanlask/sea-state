@@ -1,0 +1,47 @@
+public/data/stars.bin.gz — star catalogue data
+==============================================
+
+Contents
+  8404 stars with V <= 6.5 from the Yale Bright Star Catalogue, 5th Revised
+  Edition (BSC5): J2000 right ascension and declination, Johnson V magnitude
+  and B-V colour index, as little-endian float32 records (format documented in
+  src/sim/astro/stars.ts). For the 244 stars without a B-V value, B-V was
+  derived from the converter's approximate colour temperature (field "K").
+
+Original catalogue
+  Hoffleit, D. & Warren, W. H. Jr. (1991), "The Bright Star Catalogue, 5th
+  Revised Ed. (Preliminary Version)", Astronomical Data Center, NSSDC/ADC;
+  CDS catalogue V/50. Distributed by the Harvard-Smithsonian Center for
+  Astrophysics (http://tdc-www.harvard.edu/catalogs/bsc5.html). US-government
+  funded astronomical data, distributed without restriction; generally treated
+  as public domain.
+
+Intermediate conversion used to build this file
+  Repository: https://github.com/brettonw/YaleBrightStarCatalog
+  File:       bsc5.json
+  Commit:     abffb3b7223ae37e879b0a3ff5b49ad06aed5576
+  SHA-256:    08b019f560a20fdf67565604b2ad04c3e40938f71a4a7c187af2b88fad1a6e8b
+  Licence of the conversion (reproduced below):
+
+MIT License
+
+Copyright (c) 2016 Bretton Wade
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
