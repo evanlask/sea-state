@@ -44,6 +44,7 @@ import {
 import { EARTH_RADIUS } from '../../sim/core/units';
 import { ViewportColorCopy, ViewportDepthCopy } from '../gpuResources';
 import { type N, tsl } from '../tsl';
+import { FLASH_FALLOFF } from '../weather/flashLight';
 import {
   FOAM_ACCUMULATED_GAIN,
   FOAM_DRIFT_ACROSS,
@@ -145,6 +146,7 @@ const {
   floor,
   fract,
   frontFacing,
+  length,
   log2,
   materialEnvIntensity,
   max,
@@ -219,6 +221,13 @@ export class OceanShadingUniforms {
   // One full-screen rectangle (the full march) until the scene sets them.
   readonly ssrOccluders: OccluderSlots = createOccluderSlots(uniform(1));
   readonly ssrOccluderData: N = uniformArray(this.ssrOccluders.data, 'vec4');
+  // Lightning (weather/flashLight.ts), which the sky probe leaves out: the lit cloud base's radiance
+  // at the source (pre-exposed, 0 while dark), the source (scene m), the base's height (m), and the
+  // base's glow averaged over the sky (pre-exposed).
+  readonly flashRadiance: N = uniform(new Vector3());
+  readonly flashSource: N = uniform(new Vector3(0, 1400, 0));
+  readonly flashBase: N = uniform(1000);
+  readonly flashSky: N = uniform(new Vector3());
 }
 
 // Hash without sine (Hoskins): vec3 in [0, 1) from a vec3.
@@ -475,18 +484,18 @@ class OceanLightingModel extends LightingModel {
     const back = float(1).sub(s.front);
     const above = s.front.mul(float(1).sub(s.foam));
 
+    // Perceptual roughness (three's PMREM parameter) is √α.
+    const roughness = sqrt(sqrt(s.alpha2));
+    const r = vw.negate().reflect(nw);
+    // Rays reflected below the horizon would hit the next wave; reflect the low sky, dimmed.
+    const lookup = vec3(r.x, abs(r.y), r.z);
+    const dip = mix(0.7, 1, smoothstep(-0.2, 0, r.y));
     let sky: N = vec3(0);
     let reflection: N = vec3(0);
     const snell: N = vec3(0).toVar('oceanSnell');
     if (environment?.isTextureNode) {
       const envMap = environment.value as Texture;
       const intensity = materialEnvIntensity;
-      // Perceptual roughness (three's PMREM parameter) is √α.
-      const roughness = sqrt(sqrt(s.alpha2));
-      const r = vw.negate().reflect(nw);
-      // Rays reflected below the horizon would hit the next wave; reflect the low sky, dimmed.
-      const lookup = vec3(r.x, abs(r.y), r.z);
-      const dip = mix(0.7, 1, smoothstep(-0.2, 0, r.y));
       reflection = pmremTexture(envMap, lookup, roughness).rgb.mul(intensity).mul(dip);
       // Hemispherical sky radiance (irradiance / π) onto the sea.
       sky = pmremTexture(envMap, vec3(0, 1, 0), float(1)).rgb.mul(intensity);
@@ -497,9 +506,15 @@ class OceanLightingModel extends LightingModel {
         snell.assign(pmremTexture(envMap, outDir, roughness.add(0.05)).rgb.mul(intensity));
       });
     }
+    // Lightning: the lit cloud base where the reflected ray meets it, falling off from the source
+    // as the clouds shade it, and its glow over the whole sky for the water body and foam.
+    const reach = u.flashBase.sub(positionWorld.y).div(max(lookup.y, 0.02));
+    const base = positionWorld.add(lookup.mul(reach));
+    const glow = exp(length(base.sub(u.flashSource)).mul(-FLASH_FALLOFF / 1000));
+    reflection = reflection.add(u.flashRadiance.mul(glow).mul(dip));
+    sky = sky.add(u.flashSky);
 
     // Rough surfaces reflect less at grazing (Fdez-Agüera's roughness-aware Fresnel).
-    const roughness = sqrt(sqrt(s.alpha2));
     const grazing = max(float(1).sub(roughness), WATER_F0)
       .sub(WATER_F0)
       .div(1 - WATER_F0);
@@ -520,7 +535,7 @@ class OceanLightingModel extends LightingModel {
     const cosUnder = saturate(dot(vw, nw.negate()));
     const fresnelUnder = fresnelNode(cosUnder, WATER_IOR);
     const waterBelow = u.deepColor.mul(sky).mul(0.8).add(u.subsurfaceTint.mul(sky).mul(0.02));
-    const under = snell.mul(float(1).sub(fresnelUnder)).add(waterBelow.mul(fresnelUnder));
+    const under = snell.add(u.flashSky).mul(float(1).sub(fresnelUnder)).add(waterBelow.mul(fresnelUnder));
     diffuse = diffuse.add(under.mul(back));
 
     reflected.indirectDiffuse.addAssign(diffuse);

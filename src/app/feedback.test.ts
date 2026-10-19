@@ -1,30 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { collisionParams } from '../audio/curves';
-import { capsizeCard, CollisionAlert, rumbleForCollision, rumbleForSlam, WinchTracker } from './feedback';
-
-describe('rumble', () => {
-  it('ignores light slaps and scales with slam strength, within the motors’ range', () => {
-    expect(rumbleForSlam(1)).toBeNull();
-    const medium = rumbleForSlam(3)!;
-    const hard = rumbleForSlam(9)!;
-    expect(hard.strong).toBeGreaterThan(medium.strong);
-    expect(hard.ms).toBeGreaterThan(medium.ms);
-    for (const r of [medium, hard, rumbleForSlam(50)!]) {
-      expect(r.strong).toBeLessThanOrEqual(1);
-      expect(r.weak).toBeLessThanOrEqual(1);
-      expect(r.ms).toBeLessThanOrEqual(320);
-    }
-  });
-
-  it('thumps harder and longer for a collision than for a slam of the same speed', () => {
-    expect(rumbleForCollision(0.1)).toBeNull();
-    const hit = rumbleForCollision(3)!;
-    const slam = rumbleForSlam(3)!;
-    expect(hit.strong).toBeGreaterThan(slam.strong);
-    expect(hit.ms).toBeGreaterThan(slam.ms);
-  });
-});
+import { capsizeCard, CollisionAlert, WinchTracker } from './feedback';
 
 describe('winch clicks', () => {
   const tel = (main: number, jib = 5, reef = 0, furl = 0) => ({
@@ -74,8 +51,8 @@ describe('collision alert', () => {
 });
 
 describe('capsize card', () => {
-  it('summarises the voyage with the recover control for the device', () => {
-    const card = capsizeCard({ survived: 125, maxRoll: Math.PI / 2, slams: 7 }, { device: 'keyboard' });
+  it('summarises the voyage with the recover key', () => {
+    const card = capsizeCard({ survived: 125, maxRoll: Math.PI / 2, slams: 7 });
     expect(card.title).toBe('Capsized');
     expect(card.rows).toEqual([
       { label: 'Time afloat', value: '2:05' },
@@ -83,13 +60,9 @@ describe('capsize card', () => {
       { label: 'Slams', value: '7' },
     ]);
     expect(card.hint).toContain('Backspace');
-    expect(capsizeCard({ survived: 1, maxRoll: 0, slams: 0 }, { device: 'gamepad' }).hint).toContain('View');
-    const sunk = capsizeCard({ survived: 1, maxRoll: 0, slams: 0 }, { device: 'keyboard', sunk: true });
+    const sunk = capsizeCard({ survived: 1, maxRoll: 0, slams: 0 }, { sunk: true });
     expect(sunk.title).toBe('Sunk');
-    const best = capsizeCard(
-      { survived: 1, maxRoll: 0, slams: 0 },
-      { device: 'keyboard', survival: { isBest: true } },
-    );
+    const best = capsizeCard({ survived: 1, maxRoll: 0, slams: 0 }, { survival: { isBest: true } });
     expect(best.rows.at(-1)?.value).toBe('New best!');
   });
 });

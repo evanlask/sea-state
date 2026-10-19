@@ -18,7 +18,6 @@ import type {
   ConditionsState,
   FleetEntry,
   HudModel,
-  InputDeviceKind,
   LightSignal,
   Propulsion,
   SailingState,
@@ -135,7 +134,6 @@ interface LabState {
   boat: BoatKind;
   scenario: Scenario;
   night: boolean;
-  device: InputDeviceKind;
   autoTrim: boolean;
   fleet: boolean;
   frozen: number | null;
@@ -160,7 +158,6 @@ const state: LabState = {
     initialBoat === 'sail' ? 'beam-reach' : 'cruise',
   ),
   night: flag('night', false),
-  device: pick<InputDeviceKind>('device', ['keyboard', 'gamepad'], 'keyboard'),
   autoTrim: flag('auto', false),
   fleet: flag('fleet', true),
   frozen: params.has('t') ? Number(params.get('t')) : null,
@@ -593,7 +590,6 @@ function buildModel(t: number): HudModel {
       navLights: lights.nav,
       fleet,
       units: hud.getSettings().units,
-      device: state.device,
     },
     lastAlertIds,
   );
@@ -609,7 +605,7 @@ function buildModel(t: number): HudModel {
     alerts,
     fleet,
     camera: kind === 'sail' ? 'Cockpit' : kind === 'cargo' || kind === 'cruise' ? 'Bridge' : 'Helm',
-    controls: { device: state.device, hints: hintRowsFor(kind) },
+    controls: { hints: hintRowsFor(kind) },
   };
 }
 
@@ -632,7 +628,6 @@ function controls(): void {
     <label>Fleet <input type="checkbox" data-k="fleet"></label>
     <label>Radar <input type="checkbox" data-k="radar"></label>
     <label>Hints <input type="checkbox" data-k="hints"></label>
-    <label>Device <select data-k="device">${option('keyboard')}${option('gamepad')}</select></label>
     <h2>Display</h2>
     <label>Mode (H) <select data-k="mode">${option('full')}${option('minimal')}${option('off')}</select></label>
     <label>Scale <input type="range" min="0.6" max="1.6" step="0.05" data-k="scale"></label>
@@ -659,7 +654,6 @@ function controls(): void {
     field<HTMLInputElement>('fleet').checked = state.fleet;
     field<HTMLInputElement>('radar').checked = s.radar;
     field<HTMLInputElement>('hints').checked = s.controlHints;
-    field<HTMLSelectElement>('device').value = state.device;
     field<HTMLSelectElement>('mode').value = s.mode;
     field<HTMLInputElement>('scale').value = String(s.scale);
     field<HTMLSelectElement>('speed').value = s.units.speed;
@@ -699,9 +693,6 @@ function controls(): void {
         break;
       case 'hints':
         hud.setSettings({ controlHints: checked });
-        break;
-      case 'device':
-        state.device = el.value as InputDeviceKind;
         break;
       case 'mode':
         hud.setMode(el.value as HudMode);

@@ -92,7 +92,7 @@ export function aoBakeInput(draft: ModelDraft): AoBakeInput {
   const soups: Float32Array[] = [];
   const bounds = new Box3();
   for (const slot of aoBuilder.slots()) {
-    if (slot === 'glass' || slot === 'screen' || draft.aoExclude?.includes(slot)) continue;
+    if (slot === 'glass' || draft.aoExclude?.includes(slot)) continue;
     const g = aoBuilder.merged(slot)!;
     g.computeBoundingBox();
     bounds.union(g.boundingBox!);

@@ -43,7 +43,7 @@ interface MotionState {
 // Engine order telegraph plus the engine's actual response (ships, crab boat, cruise ship).
 export interface TelegraphReadout {
   notch: number; // index into TELEGRAPH_NOTCHES (input/axes.ts)
-  lever: number; // -1..1 lever position, differs from the notch while a trigger sweeps it
+  lever: number; // -1..1 ordered lever position (telemetry telegraphOrder)
   response: number; // -1..1 engine output actually delivered; astern negative
 }
 
@@ -230,10 +230,7 @@ export interface FleetEntry {
 export interface HintRow {
   label: string;
   keyboard: string;
-  gamepad: string;
 }
-
-export type InputDeviceKind = 'keyboard' | 'gamepad';
 
 // Shown while the helm boat is capsized or sunk: how the voyage went and how to recover.
 export interface CapsizeCardModel {
@@ -252,6 +249,6 @@ export interface HudModel {
   alerts: readonly HudAlert[];
   fleet: readonly FleetEntry[]; // includes the active boat (range 0)
   camera: string; // e.g. 'Helm', 'Chase', 'Orbit'
-  controls: { device: InputDeviceKind; hints: readonly HintRow[] };
+  controls: { hints: readonly HintRow[] };
   capsize?: CapsizeCardModel | null;
 }

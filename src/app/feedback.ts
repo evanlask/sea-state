@@ -1,35 +1,11 @@
-// Pure game-feel helpers for the app: gamepad rumble for slams and collisions, winch clicks from the
-// sail telemetry, the HUD alert after a collision, and the capsize card's content.
+// Pure game-feel helpers for the app: winch clicks from the sail telemetry, the HUD alert after a
+// collision, and the capsize card's content.
 
 import type { SpeedUnit } from '../sim/core/units';
 import { SAIL_KEYS } from '../sim/sail/telemetry';
 import { formatSpeed } from '../ui/hud/format';
-import type { CapsizeCardModel, HudAlert, InputDeviceKind } from '../ui/hud/model';
+import type { CapsizeCardModel, HudAlert } from '../ui/hud/model';
 import { formatDuration } from '../ui/menu/setup';
-
-const clamp01 = (x: number): number => (x < 0 ? 0 : x > 1 ? 1 : x);
-
-export interface Rumble {
-  strong: number; // 0..1 low-frequency motor
-  weak: number; // 0..1 high-frequency motor
-  ms: number;
-}
-
-// A hull slam on the helm boat (impact speed, m/s): light slaps buzz, hard slams thump.
-export function rumbleForSlam(strength: number): Rumble | null {
-  if (!(strength >= 1.5)) return null;
-  return {
-    strong: clamp01((strength - 1.5) / 6.5),
-    weak: clamp01(strength / 5),
-    ms: Math.min(320, 80 + 25 * strength),
-  };
-}
-
-// Hitting another boat (closing speed, m/s): heavier and longer than a slam.
-export function rumbleForCollision(speed: number): Rumble | null {
-  if (!(speed > 0.3)) return null;
-  return { strong: clamp01(speed / 4), weak: clamp01(speed / 2.5), ms: Math.min(600, 200 + 80 * speed) };
-}
 
 const WINCH_LINE = 0.3; // m of sheet ground in per click
 const WINCH_GAP = 0.18; // minimum s between clicks
@@ -107,7 +83,7 @@ export interface RunStatsLike {
 // The card shown while the helm boat is over (or gone): how the voyage went and how to recover.
 export function capsizeCard(
   stats: RunStatsLike,
-  options: { device: InputDeviceKind; sunk?: boolean; survival?: { isBest: boolean } },
+  options: { sunk?: boolean; survival?: { isBest: boolean } } = {},
 ): CapsizeCardModel {
   const rows = [
     { label: 'Time afloat', value: formatDuration(stats.survived) },
@@ -115,10 +91,9 @@ export function capsizeCard(
     { label: 'Slams', value: String(stats.slams) },
   ];
   if (options.survival?.isBest) rows.push({ label: 'Storm Survival', value: 'New best!' });
-  const recover = options.device === 'gamepad' ? 'Hold View' : 'Press Backspace';
   return {
     title: options.sunk ? 'Sunk' : 'Capsized',
     rows,
-    hint: options.sunk ? 'Respawning…' : `${recover} to recover`,
+    hint: options.sunk ? 'Respawning…' : 'Press Backspace to recover',
   };
 }

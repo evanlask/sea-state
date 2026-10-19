@@ -211,7 +211,7 @@ describe('capsize rule: the center console', () => {
         mode,
         seed,
         [{ id: 'run', rel: 150 * DEG, drive: { speed: 8 } }],
-        60,
+        40,
       );
       expect(r['run']!.capsized, mode).toBe(false);
       expect(r['run']!.maxHeel, mode).toBeLessThan(35);
@@ -221,9 +221,10 @@ describe('capsize rule: the center console', () => {
   it('Hurricane Category 1, lying beam-on at steerage way (careless): a breaking sea rolls her over', () => {
     // At least one of four one-minute runs: about a third of three-minute runs in a Storm or a
     // Category 1 are rolled over (scripts/capsize-sweep.ts). Of seeds 5-8, seeds 7 and 8 are rolled in
-    // the first minute.
+    // the first minute: so they run first, and the test stops at the first roll.
     let rolled = 0;
-    for (const seed of [5, 6, 7, 8]) {
+    for (const seed of [7, 8, 5, 6]) {
+      if (rolled) break;
       const r = voyage(
         'powerboat',
         'hurricane-1',

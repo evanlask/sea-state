@@ -139,7 +139,7 @@ describe('SettingsStore recovery', () => {
       },
       hud: { scale: 0.01, mode: 'minimal', units: { speed: 'mph', wind: 'furlongs' } },
       audio: { master: 2, effects: -1, engines: '0.25', ambience: null },
-      controls: { gamepadDeadZone: 0.9, rumble: false },
+      controls: { mouseSensitivity: 9, invertY: 'yes', retired: true },
       physics: { mode: 'simcade', telemetryPanel: 'on', dayLength: 'forever' },
       extra: { junk: true },
     });
@@ -155,7 +155,7 @@ describe('SettingsStore recovery', () => {
     expect(s.hud.mode).toBe('minimal');
     expect(s.hud.units).toEqual({ speed: 'mph', length: d.hud.units.length, wind: d.hud.units.wind });
     expect(s.audio).toMatchObject({ master: 1, effects: 0, engines: 0.25, ambience: d.audio.ambience });
-    expect(s.controls).toMatchObject({ gamepadDeadZone: 0.5, rumble: false });
+    expect(s.controls).toEqual({ mouseSensitivity: 5, invertY: d.controls.invertY }); // stale keys dropped
     expect(s.physics).toEqual({
       mode: 'arcade',
       capsizeAssist: false,

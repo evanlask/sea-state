@@ -100,7 +100,7 @@ export interface BoatTemplate {
   waterMask: BufferGeometry;
   drives?: TelemetryDrive[]; // telemetry-driven nodes (all LODs)
   animator?: AnimatorFactory; // linkages that need more than one axis (sheets, a rider's arms)
-  textures?: Texture[]; // textures the template owns (liveries, screens, the AO volume), freed with it
+  textures?: Texture[]; // textures the template owns (liveries, the AO volume), freed with it
 }
 
 const NO_TELEMETRY: Telemetry = {};
@@ -139,16 +139,11 @@ const tmp = new Vector3();
 // through tinted glass, is hidden (the camera on board is always nearer).
 const INTERIOR_PIXELS_PER_METRE = 2;
 
-// The wheelhouse interior's meshes (kit/bridge.ts slots, merged or not; 'screen' counts only with
-// an interior: the jet ski's dash display is out in the open).
+// The wheelhouse interior's meshes (kit/bridge.ts slots, merged or not).
 function interiorMeshes(lod: Object3D): Object3D[] {
   const out: Object3D[] = [];
   lod.traverse((o) => {
     if ((o as Mesh).isMesh && (INTERIOR_SLOTS.has(o.name) || o.name === INTERIOR_MESH)) out.push(o);
-  });
-  if (out.length === 0) return out;
-  lod.traverse((o) => {
-    if ((o as Mesh).isMesh && o.name === 'screen') out.push(o);
   });
   return out;
 }

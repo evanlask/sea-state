@@ -7,7 +7,7 @@
 //  - non-skid decks, brushed metal, chrome, rubber, GRP, tinted glass;
 //  - small-craft finishes: clear-coated gelcoat, moulded diamond non-skid, laid
 //    teak with caulked seams, woven canvas and stitched vinyl;
-//  - emissive lamps, screens and window facades with random cabin occupancy,
+//  - emissive lamps and window facades with random cabin occupancy,
 //    all in cd/m² × pre-exposure and switched by the shared boat uniforms.
 
 import {
@@ -526,7 +526,7 @@ export const SIMPLE_COLOR = 'simpleColor';
 export const SIMPLE_PBR = 'simplePbr'; // roughness, metalness
 export const LAMP_BASE = 'lampBase';
 export const LAMP_GLOW = 'lampGlow';
-export const LAMP_CHANNEL = 'lampChannel'; // one-hot: always, interior, deck, screen
+export const LAMP_CHANNEL = 'lampChannel'; // one-hot: always, interior, deck, bridge
 
 // The shared part of simpleMaterial and mergedSimpleMaterial.
 function simpleSurface(
@@ -578,7 +578,7 @@ export function mergedLampMaterial(): MeshStandardNodeMaterial {
   const gain = channel.x
     .add(channel.y.mul(channelGain('interior')))
     .add(channel.z.mul(channelGain('deck')))
-    .add(channel.w.mul(channelGain('screen')));
+    .add(channel.w.mul(channelGain('bridge')));
   m.colorNode = attribute(LAMP_BASE, 'vec3');
   m.roughness = 0.25;
   m.emissiveNode = attribute(LAMP_GLOW, 'vec3').mul(gain).mul(boatEnvironment.preExposure);
@@ -625,17 +625,18 @@ export function glassMaterial(
   return m;
 }
 
-export type LampChannel = 'always' | 'interior' | 'deck' | 'screen';
+// 'bridge': wheelhouse lighting, with the interior lights but dimmed at night for night vision.
+export type LampChannel = 'always' | 'interior' | 'deck' | 'bridge';
 
 const channelGain = (channel: LampChannel): N => {
   if (channel === 'interior') return boatEnvironment.interior;
   if (channel === 'deck') return boatEnvironment.deck;
-  if (channel === 'screen')
+  if (channel === 'bridge')
     return mix(float(1), float(0.06), boatEnvironment.night).mul(boatEnvironment.interior);
   return float(1);
 };
 
-// Self-lit surface (lamp lenses, nav light housings, screens) in cd/m².
+// Self-lit surface (lamp lenses, nav light housings, ceiling lights) in cd/m².
 export function lampMaterial(o: {
   color: ColorRepresentation;
   nits: number;

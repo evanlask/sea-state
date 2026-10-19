@@ -1,28 +1,11 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { GamepadLike } from './gamepad';
-import { guardedGamepads, InputManager } from './InputManager';
+import { InputManager } from './InputManager';
 import { isBrowserShortcut, isTextEntry, KeyState, MouseState } from './keyboard';
 
-interface MutablePad extends GamepadLike {
-  buttons: { pressed: boolean; value: number }[];
-  axes: number[];
-}
-
-function makePad(): MutablePad {
-  return {
-    id: 'pad',
-    index: 0,
-    connected: true,
-    mapping: 'standard',
-    buttons: Array.from({ length: 17 }, () => ({ pressed: false, value: 0 })),
-    axes: [0, 0, 0, 0],
-  };
-}
-
-function setup(pads: (GamepadLike | null)[] = [], focused = false) {
+function setup(focused = false) {
   const state = { focused };
-  const input = new InputManager({}, { getGamepads: () => pads, isUiFocused: () => state.focused });
+  const input = new InputManager({}, { isUiFocused: () => state.focused });
   const press = (code: string, shift = false) => input.keys.keyDown(code, false, shift);
   const release = (code: string) => input.keys.keyUp(code, false);
   return { input, press, release, state };
@@ -177,7 +160,7 @@ describe('InputManager keyboard', () => {
   });
 
   it('ignores game keys while a text field has focus, except Esc in menus', () => {
-    const { input, press, state } = setup([], true);
+    const { input, press, state } = setup(true);
     press('KeyW');
     press('KeyH');
     let frame = input.poll(DT, 'ship');
@@ -194,7 +177,6 @@ describe('InputManager keyboard', () => {
     input.mouse.move(100, 0, true);
     let frame = input.poll(DT, 'ship');
     expect(frame.camera.lookX).toBeCloseTo(0.25);
-    expect(frame.lastDevice).toBe('keyboard');
     input.mouse.dragging = true;
     input.mouse.move(0, 40, false);
     input.mouse.scroll(100, 0);
@@ -213,121 +195,13 @@ describe('InputManager keyboard', () => {
   });
 });
 
-describe('InputManager gamepad', () => {
-  it('sweeps the telegraph with RT and snaps when released', () => {
-    const pad = makePad();
-    const { input } = setup([pad]);
-    pad.buttons[7] = { pressed: true, value: 1 };
-    let frame = input.poll(0.25, 'ship');
-    frame = input.poll(0.25, 'ship'); // lever 0.4
-    expect(frame.lastDevice).toBe('gamepad');
-    expect(frame.telegraph?.lever).toBeCloseTo(0.4);
-    pad.buttons[7] = { pressed: false, value: 0.3 };
-    frame = input.poll(0.05, 'ship');
-    pad.buttons[7] = { pressed: false, value: 0 };
-    frame = input.poll(DT, 'ship');
-    expect(frame.telegraph?.info.name).toBe('Slow Ahead');
-    expect(frame.controls.throttle).toBe(0.4);
-  });
-
-  it('springs the jet ski throttle with the trigger', () => {
-    const pad = makePad();
-    const { input } = setup([pad]);
-    pad.buttons[7] = { pressed: true, value: 1 };
-    expect(input.poll(DT, 'pwc').controls.throttle).toBe(1);
-    pad.buttons[7] = { pressed: false, value: 0 };
-    let frame = input.poll(DT, 'pwc');
-    for (let i = 0; i < 30; i++) frame = input.poll(DT, 'pwc');
-    expect(frame.controls.throttle).toBe(0);
-  });
-
-  it('steers with the left stick through the dead zone', () => {
-    const pad = makePad();
-    const { input } = setup([pad]);
-    pad.axes[0] = 0.1;
-    expect(input.poll(DT, 'powerboat').controls.steer).toBe(0);
-    pad.axes[0] = -1;
-    expect(input.poll(DT, 'powerboat').controls.steer).toBe(-1);
-  });
-
-  it('separates View tap (HUD) from View hold (recover), and Y tap (camera) from hold (zoom step)', () => {
-    const pad = makePad();
-    const { input } = setup([pad]);
-    pad.buttons[8] = { pressed: true, value: 1 };
-    input.poll(0.1, 'ship');
-    pad.buttons[8] = { pressed: false, value: 0 };
-    let frame = input.poll(0.1, 'ship');
-    expect(frame.triggered.has('hud')).toBe(true);
-    expect(frame.triggered.has('recover')).toBe(false);
-
-    pad.buttons[8] = { pressed: true, value: 1 };
-    const fired: string[] = [];
-    for (let i = 0; i < 10; i++) for (const id of input.poll(0.1, 'ship').triggered) fired.push(id);
-    pad.buttons[8] = { pressed: false, value: 0 };
-    for (const id of input.poll(0.1, 'ship').triggered) fired.push(id);
-    expect(fired).toEqual(['recover']);
-
-    pad.buttons[3] = { pressed: true, value: 1 };
-    let steps = 0;
-    for (let i = 0; i < 12; i++) {
-      const camera = input.poll(0.1, 'ship').camera;
-      if (camera.zoomStep) steps++;
-      expect(camera.prev).toBe(false);
-    }
-    pad.buttons[3] = { pressed: false, value: 0 };
-    frame = input.poll(0.1, 'ship');
-    expect(steps).toBe(1);
-    expect(frame.camera.next).toBe(false);
-    pad.buttons[3] = { pressed: true, value: 1 };
-    input.poll(0.1, 'ship');
-    pad.buttons[3] = { pressed: false, value: 0 };
-    expect(input.poll(0.1, 'ship').camera).toMatchObject({ next: true, zoomStep: false });
-  });
-
-  it('clicking the steering stick centres the helm; on the sailboat holding it toggles auto-trim', () => {
-    const pad = makePad();
-    const { input } = setup([pad]);
-    const click = (seconds: number, context: 'sail' | 'powerboat'): string[] => {
-      const fired: string[] = [];
-      pad.buttons[10] = { pressed: true, value: 1 };
-      for (let t = 0; t < seconds; t += 0.1) fired.push(...input.poll(0.1, context).triggered);
-      pad.buttons[10] = { pressed: false, value: 0 };
-      fired.push(...input.poll(0.1, context).triggered);
-      return fired;
-    };
-    expect(click(0.1, 'sail')).toEqual(['midships']);
-    expect(click(1, 'sail')).toEqual(['autoTrim']);
-    expect(click(0.1, 'powerboat')).toEqual(['midships']);
-  });
-
-  it('feeds menu navigation and accept from the pad only in menus', () => {
-    const pad = makePad();
-    const { input } = setup([pad]);
-    pad.buttons[13] = { pressed: true, value: 1 };
-    pad.buttons[0] = { pressed: true, value: 1 };
-    let frame = input.poll(DT, 'menu');
-    expect(frame.menu.y).toBe(1);
-    expect(frame.menu.accept).toBe(true);
-    expect(frame.triggered.has('horn')).toBe(false);
-    pad.buttons[0] = { pressed: false, value: 0 };
-    input.poll(DT, 'ship');
-    pad.buttons[0] = { pressed: true, value: 1 };
-    frame = input.poll(DT, 'ship');
-    expect(frame.triggered.has('horn')).toBe(true);
-    expect(frame.menu.accept).toBe(false);
-  });
-
-  it('reports pads appearing after the first button press', () => {
-    const pads: (GamepadLike | null)[] = [];
-    const { input } = setup(pads);
-    const changes: string[] = [];
-    input.onPadChange = (change) => changes.push(change.type);
-    input.poll(DT, 'ship');
-    pads.push(makePad());
-    input.poll(DT, 'ship');
-    pads.pop();
-    input.poll(DT, 'ship');
-    expect(changes).toEqual(['connected', 'disconnected']);
+describe('InputManager menus', () => {
+  it('feeds arrow-key navigation only in menus', () => {
+    const { input, press } = setup();
+    press('ArrowDown');
+    const frame = input.poll(DT, 'menu');
+    expect(frame.menu).toMatchObject({ x: 0, y: 1, fromKeyboard: true });
+    expect(input.poll(DT, 'ship').menu).toMatchObject({ x: 0, y: 0, fromKeyboard: false });
   });
 });
 
@@ -340,30 +214,11 @@ describe('KeyState', () => {
   });
 });
 
-describe('guardedGamepads', () => {
-  it('reads as no pads once the Gamepad API throws, without throwing again', () => {
-    let calls = 0;
-    const read = guardedGamepads(() => {
-      calls++;
-      throw new DOMException('blocked', 'SecurityError');
-    });
-    expect(read()).toEqual([]);
-    expect(read()).toEqual([]);
-    expect(calls).toBe(1);
-  });
-
-  it('passes the pads through while it works', () => {
-    const pads = [null];
-    expect(guardedGamepads(() => pads)()).toBe(pads);
-  });
-});
-
 describe('MouseState', () => {
   it('only orbits while right-dragging', () => {
     const mouse = new MouseState();
     mouse.move(10, 10, false);
     expect(mouse.orbitX).toBe(0);
-    expect(mouse.hadInput).toBe(false);
   });
 
   it('stops orbiting once a lost mouseup is covered by release()', () => {

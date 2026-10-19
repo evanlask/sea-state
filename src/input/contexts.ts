@@ -7,7 +7,7 @@ import type { BoatKind } from '../sim/world/protocol';
 
 export type BoatContext = 'ship' | 'cruise' | 'powerboat' | 'pwc' | 'hydro' | 'sail';
 
-// 'photo' is the free/photo camera: WASD and the left stick fly the camera instead of the boat.
+// 'photo' is the free/photo camera: WASD flies the camera instead of the boat.
 export type InputContext = 'global' | 'camera' | 'menu' | 'photo' | BoatContext;
 
 export const BOAT_CONTEXTS: readonly BoatContext[] = ['ship', 'cruise', 'powerboat', 'pwc', 'hydro', 'sail'];

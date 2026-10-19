@@ -1,5 +1,6 @@
 // No see-through gaps in the procedural jet ski, center console and hydroplane hulls, and a water mask
-// that keeps the sea out of their open wells (the hydroplane's: the cockpit tub under its canopy).
+// that keeps the sea out of their open wells (the hydroplane's: the cockpit tub under its canopy) and
+// off the crab boat's deck.
 //
 // The see-through check is a small software rasteriser over each LOD's static structure (the
 // PartBuilder geometry: hull, decks, liners, fittings): a pixel where some surface is hit but every
@@ -11,11 +12,13 @@
 import { type BufferGeometry, Vector3 } from 'three/webgpu';
 import { describe, expect, it } from 'vite-plus/test';
 
+import { crabSpec } from '../../../sim/boats/specs/crab';
 import { powerboatSpec } from '../../../sim/boats/specs/powerboat';
 import { pwcSpec } from '../../../sim/boats/specs/pwc';
 import { RHO_SEAWATER } from '../../../sim/core/units';
 import type { ModelDraft } from '../kit/assemble';
 import { createHullLines } from '../kit/hullLines';
+import { BULWARK_FROM, BULWARK_H, deckWellMask } from './crab';
 import { CAPSULE, capsuleSill, hydroDraft } from './hydro';
 import { BOW_SOLE_Y, CASTING_AFT, GUNWALE, powerboatDraft, SOLE_Y, STEP_Z, TRANSOM_IN } from './powerboat';
 import { pwcDraft } from './pwc';
@@ -235,6 +238,38 @@ function inside(tris: number[][], x: number, y: number, z: number): boolean {
   return n % 2 === 1;
 }
 
+// Each separate volume of a water mask is closed, consistently wound and faces outward.
+function expectClosedOutward(mask: BufferGeometry): void {
+  for (const v of volumes(mask)) {
+    const edges = new Map<string, number>();
+    for (const [a, b, c] of v.ids) {
+      for (const [u, w] of [
+        [a!, b!],
+        [b!, c!],
+        [c!, a!],
+      ]) {
+        const key = `${u},${w}`;
+        edges.set(key, (edges.get(key) ?? 0) + 1);
+      }
+    }
+    // Each directed edge once and its reverse once: closed and consistently wound.
+    for (const [key, count] of edges) {
+      const [u, w] = key.split(',');
+      expect(count).toBe(1);
+      expect(edges.get(`${w},${u}`)).toBe(1);
+    }
+    let volume = 0;
+    for (const t of v.tris) {
+      volume +=
+        (t[0]! * (t[4]! * t[8]! - t[5]! * t[7]!) -
+          t[1]! * (t[3]! * t[8]! - t[5]! * t[6]!) +
+          t[2]! * (t[3]! * t[7]! - t[4]! * t[6]!)) /
+        6;
+    }
+    expect(volume).toBeGreaterThan(0);
+  }
+}
+
 const DEG = Math.PI / 180;
 
 interface Well {
@@ -282,34 +317,7 @@ describe('water mask', () => {
 
   for (const m of MODELS) {
     it(`${m.kind}: every volume is closed and wound outward`, () => {
-      for (const v of volumes(m.draft.waterMask)) {
-        const edges = new Map<string, number>();
-        for (const [a, b, c] of v.ids) {
-          for (const [u, w] of [
-            [a!, b!],
-            [b!, c!],
-            [c!, a!],
-          ]) {
-            const key = `${u},${w}`;
-            edges.set(key, (edges.get(key) ?? 0) + 1);
-          }
-        }
-        // Each directed edge once and its reverse once: closed and consistently wound.
-        for (const [key, count] of edges) {
-          const [u, w] = key.split(',');
-          expect(count).toBe(1);
-          expect(edges.get(`${w},${u}`)).toBe(1);
-        }
-        let volume = 0;
-        for (const t of v.tris) {
-          volume +=
-            (t[0]! * (t[4]! * t[8]! - t[5]! * t[7]!) -
-              t[1]! * (t[3]! * t[8]! - t[5]! * t[6]!) +
-              t[2]! * (t[3]! * t[7]! - t[4]! * t[6]!)) /
-            6;
-        }
-        expect(volume).toBeGreaterThan(0);
-      }
+      expectClosedOutward(m.draft.waterMask);
     });
 
     // The mask is in the body frame; the sea is level. Bow up (planing) to bow down (into a wave), at
@@ -344,4 +352,52 @@ describe('water mask', () => {
       expect(misses.slice(0, 10)).toEqual([]);
     });
   }
+});
+
+// The crab boat's open deck: inside the bulwarks, from the deck up to the capping rail (and out
+// through the freeing ports into the plating), from beside the house to the transom bulwark. The
+// sea must not be drawn anywhere in it, whichever way the boat heels or trims.
+describe('crab boat water mask', () => {
+  const lines = createHullLines(crabSpec.hull, crabSpec.mass / RHO_SEAWATER);
+  const well = deckWellMask(lines);
+
+  it('every volume is closed and wound outward', () => {
+    expectClosedOutward(well);
+  });
+
+  it('covers the whole deck inside the bulwarks', () => {
+    const vs = volumes(well);
+    const misses: string[] = [];
+    const z0 = BULWARK_FROM + 0.05;
+    const z1 = lines.zStern - 0.2;
+    for (let i = 0; i <= 40; i++) {
+      const z = z0 + ((z1 - z0) * i) / 40;
+      const yd = lines.deckY(z);
+      const out = lines.deckHalf(z) - 0.04;
+      for (let k = 0; k <= 5; k++) {
+        const y = yd + 0.01 + ((BULWARK_H - 0.02) * k) / 5;
+        for (let j = 0; j <= 8; j++) {
+          const x = (out * j) / 8;
+          for (const side of [-1, 1]) {
+            if (!vs.some((v) => inside(v.tris, side * x, y, z)))
+              misses.push(`(${(side * x).toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`);
+          }
+        }
+      }
+    }
+    expect(misses.slice(0, 10)).toEqual([]);
+  });
+
+  it('stays inside the hull and its bulwarks', () => {
+    const p = well.getAttribute('position');
+    const wide: string[] = [];
+    for (let i = 0; i < p.count; i++) {
+      const [x, y, z] = [p.getX(i), p.getY(i), p.getZ(i)];
+      const yd = lines.deckY(z);
+      // The hull below the deck edge, the bulwarks' outer face (flared) above it.
+      const limit = y <= yd ? lines.halfBreadthAt(z, y) : lines.deckHalf(z) + 0.08 * (y - yd);
+      if (Math.abs(x) > limit + 1e-3) wide.push(`(${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`);
+    }
+    expect(wide.slice(0, 10)).toEqual([]);
+  });
 });

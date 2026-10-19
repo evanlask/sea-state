@@ -1,6 +1,6 @@
-// Gamepad menu navigation. pickNext() is the pure geometry: the nearest
+// Arrow-key menu navigation. pickNext() is the pure geometry: the nearest
 // focusable element in a direction, preferring ones in the same row or column.
-// FocusNavigator is the thin DOM glue that moves focus and clicks.
+// FocusNavigator is the thin DOM glue that moves focus.
 
 import type { MenuInput } from './InputManager';
 
@@ -149,10 +149,6 @@ export class FocusNavigator {
     const arrowsNative = menu.fromKeyboard && ownsArrows(active);
     const direction = this.repeat.update(arrowsNative ? null : directionOf(menu.x, menu.y), dt);
     if (direction) this.move(direction);
-    if (menu.accept) {
-      if (active instanceof HTMLElement && this.container.contains(active)) active.click();
-      else this.move('down');
-    }
     if (menu.back) this.options.onBack?.();
     if (menu.tabPrev) this.options.onTabPrev?.();
     if (menu.tabNext) this.options.onTabNext?.();

@@ -58,14 +58,7 @@ import { PerfOverlay } from '../ui/overlay/PerfOverlay';
 import { TelemetryPanel } from '../ui/telemetry/TelemetryPanel';
 import { showFatalError, showUnsupported } from '../ui/unsupported';
 import { AudioFrameBuilder } from './audioFrame';
-import {
-  capsizeCard,
-  CollisionAlert,
-  type Rumble,
-  rumbleForCollision,
-  rumbleForSlam,
-  WinchTracker,
-} from './feedback';
+import { capsizeCard, CollisionAlert, WinchTracker } from './feedback';
 import { FrameRuntime } from './FrameRuntime';
 import { type FrameInfo, GameLoop } from './GameLoop';
 import { sceneGraphicsFor } from './graphicsOptions';
@@ -1115,7 +1108,6 @@ export class App {
       latitudeDeg: region.latitudeDeg,
       longitudeDeg: region.longitudeDeg,
       camera: this.rig.modeLabel,
-      device: this.input.lastDevice,
       lights: { ...this.lights, signals: this.helmBoat ? this.signalsFor(this.helmBoat) : [] },
       alerts: [...boatModelNotices(), ...this.survivalAlerts(boats, dt, session), ...this.feedbackAlerts(dt)],
       units: this.settings.get().hud.units,
@@ -1202,11 +1194,7 @@ export class App {
     this.collisionAlert = new CollisionAlert();
   }
 
-  private rumble(r: Rumble | null): void {
-    if (r && !this.menu.isOpen) this.input.rumble(r.strong, r.weak, r.ms);
-  }
-
-  // Sim events that concern the boat at the helm: slams and collisions count, buzz the pad and warn;
+  // Sim events that concern the boat at the helm: slams and collisions count and warn;
   // a capsize cuts to an outside view of the roll with the voyage's card; recovering puts it back.
   private helmEvents(events: readonly SimEvent[], boats: readonly BoatSnapshot[]): void {
     const helm = this.helmId;
@@ -1217,7 +1205,6 @@ export class App {
           this.hudBuilder.addSlam();
           this.survival?.addSlam();
           if (!this.helmDown) this.voyage.addSlam();
-          this.rumble(rumbleForSlam(event.strength));
           break;
         case 'collision': {
           if (event.boatId !== helm && event.otherId !== helm) break;
@@ -1228,7 +1215,6 @@ export class App {
             event.speed,
             this.settings.get().hud.units.speed,
           );
-          this.rumble(rumbleForCollision(event.speed));
           break;
         }
         case 'capsized':
@@ -1287,7 +1273,6 @@ export class App {
     if (!down) return null;
     const run = this.survival;
     return capsizeCard(run ?? this.voyage, {
-      device: this.input.lastDevice,
       sunk: down.sunk,
       survival: run ? { isBest: this.survivalBest } : undefined,
     });
@@ -1315,6 +1300,9 @@ export class App {
         void this.session?.scene.setCollisionDebug(on);
       });
     gui.add({ contrail: () => this.forceContrail() }, 'contrail').name('jet contrail overhead');
+    // lil-gui leaves its inputs unnamed, which DevTools flags as an issue on every page load.
+    for (const c of gui.controllersRecursive())
+      for (const el of c.domElement.querySelectorAll('input, select')) el.setAttribute('name', c.property);
     setInterval(() => {
       const loop = this.session?.loop;
       stats.simTime = Math.round((loop?.simTime ?? 0) * 100) / 100;

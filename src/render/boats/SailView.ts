@@ -76,6 +76,7 @@ interface SailMesh {
 
 const PANEL_WIDTH = 1.05; // m, cross-cut panel height
 const SEAM = 0.012; // m half-width of a seam
+const FURLED_ROLL_CHORD = 0.5; // m around the rolled genoa (≈ 2π × its ~8 cm radius)
 const sunDirection = uniform(new Vector3(0.3, 0.8, 0.2));
 const sunColor = uniform(new Color(1, 0.97, 0.9));
 const translucency = uniform(0.45);
@@ -169,7 +170,12 @@ export class SailView {
     const fx = r.tack;
     const head = new Vector3(0, r.deckY + r.I - r.genoaHeadDrop, r.mastZ - 0.1);
     const stay = new Vector3().subVectors(head, new Vector3(fx.x, fx.y, fx.z));
-    this.furledRoll = new Mesh(new CylinderGeometry(1, 0.35, 1, 10), this.main.material);
+    // The genoa's own cloth; the shader's 'chord' (metres around the roll here) is the circumference
+    // of a mid-size roll, so its seams and tapes read at the same scale as on the open sail.
+    const roll = new CylinderGeometry(1, 0.35, 1, 10);
+    const around = new Float32Array(roll.getAttribute('position').count).fill(FURLED_ROLL_CHORD);
+    roll.setAttribute('chord', new BufferAttribute(around, 1));
+    this.furledRoll = new Mesh(roll, this.jib.material);
     this.furledRoll.position.set(fx.x, fx.y, fx.z).addScaledVector(stay, 0.5);
     this.furledRoll.quaternion.setFromUnitVectors(new Vector3(0, 1, 0), stay.clone().normalize());
     this.furledRoll.scale.set(0.001, stay.length(), 0.001);
@@ -256,7 +262,7 @@ export class SailView {
       s.material.dispose();
     }
     this.buildSails();
-    this.furledRoll.material = this.main.material;
+    this.furledRoll.material = this.jib.material;
   }
 
   // Sun direction (world, toward the sun), colour and a 0..1 strength for the back-lit glow.

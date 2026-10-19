@@ -43,6 +43,7 @@ import { releaseBuffer } from '../gpuResources';
 import { PLANET_RADIUS } from '../sky/AtmosphereLuts';
 import type { SkySystem } from '../sky/SkySystem';
 import { type N, tsl } from '../tsl';
+import { FLASH_CLOUD_RADIANCE, flashSourceHeight } from '../weather/flashLight';
 import {
   DIRECT_EXTINCTION,
   lowSunShadowFade,
@@ -131,7 +132,6 @@ const FP16_SAFE = 60000;
 const MAIN_DISTANCE = 260; // km: beyond the horizon of a 10 km anvil top
 const ENV_DISTANCE = 200;
 const SUN_LIGHT_LIMIT = -6 * (Math.PI / 180); // below this the moon lights the clouds
-const FLASH_CLOUD_RADIANCE = 900; // cd/m² near a nominal flash
 const READBACK_INTERVAL = 0.25; // s
 const WG = 8;
 const UNMARCHED_HISTORY = 0.9; // history weight of pixels not marched this frame (upscale)
@@ -155,6 +155,13 @@ interface CloudFlash {
   intensity: number;
   position: { x: number; y: number; z: number }; // world m
   color: { r: number; g: number; b: number };
+}
+
+// The flash as the sea and the boats see it (weather/flashLight.ts).
+export interface CloudFlashLight {
+  source: Vector3; // scene m, inside the cloud base
+  baseM: number; // m, height of the lit base
+  radiance: Vector3; // cd/m² of the lit base at the source, scaled by the cloud cover
 }
 
 export interface CloudFrame {
@@ -264,6 +271,8 @@ export class CloudSystem {
   private readbackPending = false;
   private focusT = 1;
   private meanT = 1;
+  private readonly flashOut: CloudFlashLight = { source: new Vector3(), baseM: 0, radiance: new Vector3() };
+  private flashLit = false;
   private visibility = Number.POSITIVE_INFINITY;
   private overcastWeight = Number.NaN; // smoothed overcastAirWeight (NaN: snap on the next update)
   private focusDirectT = 1;
@@ -354,6 +363,11 @@ export class CloudSystem {
   get airLight(): number {
     if (!this.enabled || !this.layer.enabled) return 1;
     return Math.min(0.3 + 0.7 * this.meanT, airLightFromCover(this.layer.coverage));
+  }
+
+  // The lightning flash as the sea and the boats see it, or null while dark (and without clouds).
+  get flashLight(): Readonly<CloudFlashLight> | null {
+    return this.flashLit ? this.flashOut : null;
   }
 
   get cloudLayer(): Readonly<CloudLayer> {
@@ -688,12 +702,18 @@ export class CloudSystem {
     if (flash && flash.intensity > 0 && this.enabled) {
       const k = flash.intensity * FLASH_CLOUD_RADIANCE;
       radiance.set(flash.color.r * k, flash.color.g * k, flash.color.b * k);
-      const base = this.layer.baseKm;
       // The flash lights the cloud from inside: at least a few hundred metres above the base.
-      const y = Math.max(flash.position.y / 1000, base + 0.4);
-      (u.flashPosition.value as Vector3).set(flash.position.x / 1000, R + y, flash.position.z / 1000);
+      const baseM = this.layer.baseKm * 1000;
+      const y = flashSourceHeight(flash.position.y, baseM);
+      (u.flashPosition.value as Vector3).set(flash.position.x / 1000, R + y / 1000, flash.position.z / 1000);
+      const out = this.flashOut;
+      out.source.set(flash.position.x, y, flash.position.z);
+      out.baseM = baseM;
+      out.radiance.copy(radiance).multiplyScalar(this.layer.enabled ? this.layer.coverage : 0);
+      this.flashLit = out.radiance.x > 0;
     } else {
       radiance.set(0, 0, 0);
+      this.flashLit = false;
     }
   }
 
@@ -1022,6 +1042,7 @@ export class CloudSystem {
         lightSteps: q.envLightSteps,
         detail: false,
         maxDistance: ENV_DISTANCE,
+        flash: false,
       });
       const color = min(result.color.mul(k.envExposure), FP16_SAFE);
       textureStore(this.env, uvec2(x, id.y), vec4(color, result.transmittance)).toWriteOnly();

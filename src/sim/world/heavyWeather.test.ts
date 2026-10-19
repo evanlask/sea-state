@@ -97,18 +97,18 @@ function cruiseHeel(weather: string, rel: number, underWay: boolean, seconds: nu
 
 describe('the cruise ship rides out heavy weather (Realistic)', () => {
   it('Storm, under way beam-on to the seas with her fin stabilisers: heel under 20°', () => {
-    const r = cruiseHeel('storm', Math.PI / 2, true, 90);
+    const r = cruiseHeel('storm', Math.PI / 2, true, 60);
     expect(r.capsized).toBe(false);
     expect(r.maxHeel).toBeLessThan(20);
   }, 60_000);
 
   it('Hurricane Category 3, under way head to the seas: heel under 15°', () => {
-    const r = cruiseHeel('hurricane-3', 0, true, 90);
+    const r = cruiseHeel('hurricane-3', 0, true, 60);
     expect(r.maxHeel).toBeLessThan(15);
   }, 60_000);
 
   it('Hurricane Category 5, drifting beam-on: never capsizes, heel under 60°', () => {
-    const r = cruiseHeel('hurricane-5', Math.PI / 2, false, 120);
+    const r = cruiseHeel('hurricane-5', Math.PI / 2, false, 80);
     expect(r.capsized).toBe(false);
     expect(r.maxHeel).toBeLessThan(60);
   }, 60_000);

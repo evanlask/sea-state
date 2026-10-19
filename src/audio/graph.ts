@@ -27,9 +27,20 @@ export const TAU_FAST = 0.03;
 export const TAU = 0.1;
 export const TAU_SLOW = 0.4;
 
+// `value` within the parameter's own range. A filter's frequency tops out at the context's Nyquist
+// frequency, which is only 12 kHz on a 24 kHz device (some Bluetooth headsets): the browser would
+// clamp an "open" 18–20 kHz cutoff anyway, warning on every write.
+export function inRange(param: AudioParam, value: number): number {
+  // Test doubles may leave the range out.
+  const { minValue, maxValue } = param as Partial<AudioParam>;
+  if (maxValue !== undefined && value > maxValue) return maxValue;
+  if (minValue !== undefined && value < minValue) return minValue;
+  return value;
+}
+
 // Smoothly moves a parameter toward `value`; ignores NaN/∞ so bad input can never poison a param.
 export function ramp(param: AudioParam, value: number, now: number, tau = TAU): void {
-  if (Number.isFinite(value)) param.setTargetAtTime(value, now, tau);
+  if (Number.isFinite(value)) param.setTargetAtTime(inRange(param, value), now, tau);
 }
 
 export function gainNode(ctx: BaseAudioContext, gain = 0): GainNode {
@@ -46,7 +57,7 @@ export function filterNode(
 ): BiquadFilterNode {
   const node = ctx.createBiquadFilter();
   node.type = type;
-  node.frequency.value = frequency;
+  node.frequency.value = inRange(node.frequency, frequency);
   node.Q.value = q;
   return node;
 }
@@ -340,7 +351,10 @@ export class OneShotPlayer {
     }
     voice.gain.gain.setValueAtTime(Number.isFinite(options.gain) ? options.gain : 0, when);
     const cutoff = options.cutoff ?? 20000;
-    voice.filter.frequency.setValueAtTime(Number.isFinite(cutoff) ? cutoff : 20000, when);
+    voice.filter.frequency.setValueAtTime(
+      inRange(voice.filter.frequency, Number.isFinite(cutoff) ? cutoff : 20000),
+      when,
+    );
     const panner = voice.panner;
     if (panner instanceof PannerNode) {
       const ref = options.refDistance ?? 5;

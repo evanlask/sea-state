@@ -1,6 +1,6 @@
 // Tiny DOM helpers for the menus: an element factory plus a few reusable controls (segmented
 // choice, slider, toggle). No framework; every control exposes set() so screens can refresh
-// values from the store without rebuilding the DOM (which would lose gamepad focus).
+// values from the store without rebuilding the DOM (which would lose focus).
 
 type Child = Node | string | null | undefined | false;
 
@@ -61,7 +61,7 @@ export interface ChoiceOption<T> {
   title?: string;
 }
 
-// A row of radio-like buttons. Better than <select> for gamepads: every option is focusable.
+// A row of radio-like buttons. Better than <select> for arrow-key navigation: every option is focusable.
 export function choice<T>(
   options: readonly ChoiceOption<T>[],
   value: T,
@@ -186,7 +186,7 @@ export function section(title: string, children: readonly Child[], className = '
 }
 
 // ---------------------------------------------------------------------------------------------
-// Tabs (LB / RB and Page Up / Down switch them via the controller)
+// Tabs (Page Up / Down switch them via the controller)
 
 export interface Tabs {
   readonly element: HTMLElement; // the tab strip

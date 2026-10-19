@@ -1,7 +1,6 @@
-// DOM event glue: feeds keyboard, mouse and gamepad-connection events into an
-// InputManager. Kept thin so the logic stays testable without a browser.
+// DOM event glue: feeds keyboard and mouse events into an InputManager.
+// Kept thin so the logic stays testable without a browser.
 
-import type { PadChange } from './gamepad';
 import type { InputManager } from './InputManager';
 import { isBrowserShortcut, isTextEntry } from './keyboard';
 
@@ -12,7 +11,6 @@ export interface DomInputOptions {
   pointerLockOnClick?: boolean;
   // Losing pointer lock (Esc in the browser) should pause the game.
   onPointerLockLost?: () => void;
-  onPadChange?: (change: PadChange) => void;
 }
 
 export function attachInputListeners(input: InputManager, options: DomInputOptions): () => void {
@@ -22,7 +20,6 @@ export function attachInputListeners(input: InputManager, options: DomInputOptio
   const active = (): Element | null => document.activeElement;
 
   input.sources.isUiFocused ??= () => isTextEntry(active() as HTMLElement | null);
-  if (options.onPadChange) input.onPadChange = options.onPadChange;
 
   window.addEventListener(
     'keydown',
@@ -99,10 +96,6 @@ export function attachInputListeners(input: InputManager, options: DomInputOptio
     },
     { signal },
   );
-
-  // Polling getGamepads() finds pads (and InputManager diffs connections), but
-  // some browsers only expose pads once a gamepad listener exists.
-  window.addEventListener('gamepadconnected', () => undefined, { signal });
 
   return () => controller.abort();
 }

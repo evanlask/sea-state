@@ -8,7 +8,6 @@ import {
   CAMERA_MODES,
   CameraRig,
   cycleModes,
-  nextZoomPreset,
   parseCameraMode,
   photoSpeed,
   resolveMode,
@@ -399,7 +398,7 @@ describe('photo camera', () => {
     const a = rig.aperture;
     rig.update(DT, boat, input({ zoom: -3 }), 0); // wheel forward opens up
     expect(rig.aperture).toBeGreaterThan(a);
-    rig.update(DT, boat, input({ aperture: -6 }), 0); // LB closes down
+    rig.update(DT, boat, input({ zoom: 6 }), 0); // wheel back closes down
     expect(rig.aperture).toBeLessThan(a);
   });
 
@@ -413,15 +412,5 @@ describe('photo camera', () => {
     expect(rig.mode).toBe('photo');
     expect(rig.camera.position.z).toBeGreaterThan(50 + 20);
     expect(forwardOf(rig).z).toBeLessThan(0);
-  });
-});
-
-describe('zoom presets', () => {
-  it('steps near → normal → far → near, from wherever the wheel left it', () => {
-    expect(nextZoomPreset(1)).toBe(1.8);
-    expect(nextZoomPreset(1.8)).toBe(0.6);
-    expect(nextZoomPreset(0.6)).toBe(1);
-    expect(nextZoomPreset(1.3)).toBe(1.8);
-    expect(nextZoomPreset(3)).toBe(0.6);
   });
 });

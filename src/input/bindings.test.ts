@@ -38,7 +38,6 @@ describe('bindings table', () => {
         label: '',
         description: '',
         keys: ['KeyB'],
-        pad: [],
       },
       {
         kind: 'button',
@@ -47,49 +46,26 @@ describe('bindings table', () => {
         label: '',
         description: '',
         keys: ['KeyB'],
-        pad: [{ button: 'A', mode: 'press' }],
-      },
-      {
-        kind: 'button',
-        id: 'reefIn',
-        contexts: ['sail'],
-        label: '',
-        description: '',
-        keys: [],
-        pad: [{ button: 'A', mode: 'hold' }],
       },
     ];
     const found = findConflicts('sail', clash);
-    expect(found.map((c) => c.input)).toEqual(['KeyB', 'A:hold']);
+    expect(found.map((c) => c.input)).toEqual(['KeyB']);
     expect(findConflicts('ship', clash)).toEqual([]);
   });
 
-  it('puts the five light switches on the number keys and the D-pad', () => {
+  it('puts the five light switches on the number keys', () => {
     const lights = ['navLights', 'deckLights', 'cabinLights', 'signals', 'extraLights'];
     lights.forEach((id, i) => expect(row('ship', id)?.keyboard.split(' / ')[0]).toBe(String(i + 1)));
-    expect(row('ship', 'deckLights')).toMatchObject({ keyboard: '2 / L', gamepad: 'D-pad ↓ (tap)' });
-    expect(row('ship', 'cabinLights')?.gamepad).toBe('D-pad ↓ (hold)');
-    expect(row('ship', 'signals')).toMatchObject({ keyboard: '4', gamepad: 'D-pad ↑ (hold)' });
-    expect(row('ship', 'extraLights')?.gamepad).toBe('D-pad ← (hold) / D-pad → (hold)');
-    expect(row('ship', 'nextBoat')?.gamepad).toBe('D-pad → (tap)');
+    expect(row('ship', 'deckLights')?.keyboard).toBe('2 / L');
+    expect(row('ship', 'signals')?.keyboard).toBe('4');
     // Global, so the same on every helm and in photo mode.
     for (const context of POLL_CONTEXTS.filter((c) => c !== 'menu'))
       for (const id of lights) expect(row(context, id), `${context}:${id}`).toBeDefined();
   });
 
-  it('centres the helm with a click of the steering stick on every boat', () => {
-    expect(row('ship', 'midships')?.gamepad).toBe('X / L3 (tap)');
-    expect(row('pwc', 'midships')?.gamepad).toBe('X / L3 (tap)');
-    expect(row('sail', 'midships')?.gamepad).toBe('L3 (tap)');
-    expect(row('sail', 'autoTrim')?.gamepad).toBe('L3 (hold)');
-    expect(row('sail', 'letFly')).toMatchObject({ keyboard: 'Space', gamepad: '—' });
-    expect(row('ship', 'zoom')?.gamepad).toBe('Y (hold)');
-    expect(row('ship', 'cameraNext')?.gamepad).toBe('Y (tap)');
-  });
-
-  it('allows tap and hold on one button', () => {
-    expect(row('ship', 'hud')?.gamepad).toBe('View (tap)');
-    expect(row('ship', 'recover')?.gamepad).toBe('View (hold)');
+  it('centres the helm with X on every boat', () => {
+    for (const context of BOAT_CONTEXTS) expect(row(context, 'midships')?.keyboard, context).toBe('X');
+    expect(row('sail', 'letFly')?.keyboard).toBe('Space');
   });
 
   it('gives every action a keyboard or mouse binding, a label and a description', () => {
@@ -99,24 +75,6 @@ describe('bindings table', () => {
     }
     for (const context of POLL_CONTEXTS) {
       for (const r of describeBindings(context)) expect(r.keyboard, r.id).not.toBe('—');
-    }
-  });
-
-  it('gives every boat and camera action a gamepad binding', () => {
-    const keyboardOnly = new Set([
-      'help',
-      'telemetry',
-      'perf',
-      'timeEarlier',
-      'timeLater',
-      'timeScale',
-      'cameraPrev', // tap Y cycles forward; hold Y steps the zoom
-      'letFly', // LT and LB ease both sheets
-    ]);
-    for (const context of POLL_CONTEXTS) {
-      for (const r of describeBindings(context)) {
-        if (!keyboardOnly.has(r.id)) expect(r.gamepad, `${context}:${r.id}`).not.toBe('—');
-      }
     }
   });
 
@@ -130,16 +88,15 @@ describe('bindings table', () => {
 
 describe('describeBindings', () => {
   it('uses friendly names', () => {
-    expect(row('ship', 'telegraph')).toMatchObject({ keyboard: 'W / S', gamepad: 'RT / LT', group: 'ship' });
-    expect(row('pwc', 'steer')).toMatchObject({ keyboard: 'A / D', gamepad: 'Left stick X' });
-    expect(row('sail', 'jibSheet')).toMatchObject({ keyboard: 'Q / E', gamepad: 'LB / RB' });
-    expect(row('ship', 'navLights')).toMatchObject({ keyboard: '1 / N', gamepad: 'D-pad ↑ (tap)' });
+    expect(row('ship', 'telegraph')).toMatchObject({ keyboard: 'W / S', group: 'ship' });
+    expect(row('pwc', 'steer')?.keyboard).toBe('A / D');
+    expect(row('sail', 'jibSheet')?.keyboard).toBe('Q / E');
+    expect(row('ship', 'navLights')?.keyboard).toBe('1 / N');
     expect(row('ship', 'help')?.keyboard).toBe('? / F1');
     expect(row('ship', 'pause')?.keyboard).toBe('P / Esc');
-    expect(row('ship', 'look')).toMatchObject({ gamepad: 'Right stick' });
     expect(row('ship', 'look')?.keyboard).toContain('Mouse');
     expect(row('ship', 'zoom')?.keyboard).toBe('Wheel · = / -');
-    expect(row('menu', 'menuNavigate')?.gamepad).toBe('D-pad / Left stick');
+    expect(row('menu', 'menuNavigate')?.keyboard).toBe('↑ ↓ ← →');
     expect(row('sail', 'reefOut')?.keyboard).toBe('Shift+R');
   });
 
@@ -150,11 +107,11 @@ describe('describeBindings', () => {
       expect.arrayContaining(['photoMove', 'photoRise', 'photoAperture', 'photoSlowMo', 'photoMode', 'look']),
     );
     expect(rows.some((r) => r.id === 'steer' || r.id === 'telegraph')).toBe(false);
-    expect(row('photo', 'photoMove')).toMatchObject({ keyboard: 'W S A D', gamepad: 'Left stick' });
-    expect(row('photo', 'photoRise')).toMatchObject({ keyboard: 'Q / E', gamepad: 'LT / RT' });
-    expect(row('photo', 'photoAperture')).toMatchObject({ keyboard: 'Wheel', gamepad: 'LB / RB' });
-    expect(row('ship', 'photoMode')).toMatchObject({ keyboard: 'K', gamepad: 'R3 (hold)' });
-    expect(row('ship', 'cameraReset')?.gamepad).toBe('R3 (tap)');
+    expect(row('photo', 'photoMove')?.keyboard).toBe('W S A D');
+    expect(row('photo', 'photoRise')?.keyboard).toBe('Q / E');
+    expect(row('photo', 'photoAperture')?.keyboard).toBe('Wheel');
+    expect(row('ship', 'photoMode')?.keyboard).toBe('K');
+    expect(row('ship', 'cameraReset')?.keyboard).toBe('Z');
   });
 
   it('lists only the live contexts, boat controls first', () => {

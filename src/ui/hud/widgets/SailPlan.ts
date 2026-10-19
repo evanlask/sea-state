@@ -224,11 +224,10 @@ export class SailPlan implements Widget {
     toggle(this.panel, 'is-auto', s.autoTrim);
     show(this.jibEl, s.jibFurl < 0.98);
 
-    const device = m.controls.device;
     // In irons no sheet will help; the hint says to bear away instead.
     const quiet = s.autoTrim || s.inIrons;
-    this.writeRow('main', s.mainTrim, sheetKeys('mainSheet', device), quiet);
-    this.writeRow('jib', s.jibFurl >= 0.98 ? null : s.jibTrim, sheetKeys('jibSheet', device), quiet);
+    this.writeRow('main', s.mainTrim, sheetKeys('mainSheet'), quiet);
+    this.writeRow('jib', s.jibFurl >= 0.98 ? null : s.jibTrim, sheetKeys('jibSheet'), quiet);
     this.main.cls.set(s.mainTrim);
     this.jib.cls.set(s.jibTrim);
 

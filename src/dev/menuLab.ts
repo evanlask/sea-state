@@ -1,5 +1,5 @@
 // Menu lab (dev only): every menu screen over a painted ocean, driven by a real InputManager so
-// keyboard and gamepad navigation can be tried. ?screen=main|setup|pause|conditions|fleet|
+// keyboard navigation can be tried. ?screen=main|setup|pause|conditions|fleet|
 // settings|help opens a screen; emitted events are logged bottom right.
 
 import '../styles/base.css';

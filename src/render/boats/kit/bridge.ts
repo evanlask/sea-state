@@ -1,8 +1,8 @@
 // Wheelhouse / bridge builder shared by the ships and workboats: walls with
 // raked front windows (mullions, glass panes, sun visor), side windows, and an
-// interior good enough for the first-person helm camera (console with lit
-// screens, chairs, steering stand, chart table, ceiling lights). Returns the
-// wiper pivots so the model can add animated wipers.
+// interior good enough for the first-person helm camera (console, chairs,
+// steering stand, chart table, ceiling lights). Returns the wiper pivots so the
+// model can add animated wipers.
 //
 // Frame: body coordinates; the house is centred on x = cx, front at zFront (bow side).
 
@@ -18,6 +18,8 @@ export const BRIDGE_SLOTS = {
   ceiling: 'ceiling',
   ceilingLight: 'ceilingLight',
 } as const;
+
+const FLOOR_PROUD = 0.02; // m, the floor's top above floorY
 
 export interface WheelhouseOptions {
   cx?: number;
@@ -75,8 +77,9 @@ export function wheelhouse(b: PartBuilder, o: WheelhouseOptions): { wipers: Wipe
   ): void => {
     b.add(slot, bevelBox(w, h, d, bevel), at(cx + x, y, z, rx));
   };
-  // Floor slab and roof with a forward visor.
-  box(BRIDGE_SLOTS.floor, W - 0.05, 0.25, L - 0.05, 0, y0 - 0.125, o.zFront + L / 2, 0.02);
+  // Floor slab and roof with a forward visor. The floor stands a little proud of floorY, where the
+  // house it sits on usually has its roof: coplanar, the two would z-fight through the windows.
+  box(BRIDGE_SLOTS.floor, W - 0.05, 0.25, L - 0.05, 0, y0 - 0.125 + FLOOR_PROUD, o.zFront + L / 2, 0.02);
   const visor = o.visor ?? 0.8;
   box(roofSlot, W + 0.3, 0.3, L + lean + visor, 0, yR + 0.15, o.zFront + L / 2 - (lean + visor) / 2, 0.1);
   // Front: sill wall, header (slanted to the visor), mullions and glass.
@@ -185,18 +188,6 @@ function interior(b: PartBuilder, o: WheelhouseOptions, cx: number, W: number, L
   profile.closePath();
   const zc = o.zFront + 0.35;
   b.add(BRIDGE_SLOTS.console, extrude(profile, cw, 'x', { bevel: 0.03 }), at(cx, y0, zc));
-  // Screens on the sloping face (radar / ECDIS / conning, cycling the atlas columns).
-  const screens = Math.max(2, Math.floor(cw / 0.75));
-  const slope = Math.atan2(0.2, depth * 0.65);
-  for (let i = 0; i < screens; i++) {
-    const x = -cw / 2 + ((i + 0.5) * cw) / screens;
-    const k = [0, 1, 2, 1, 0, 2][i % 6]!;
-    b.add(
-      SLOTS.screen,
-      atlasPlane(0.55, 0.42, [k / 3, 0], [(k + 1) / 3, 1]),
-      at(cx + x, y0 + deskH - 0.02, zc + depth * 0.66, -Math.PI / 2 + slope + 0.35),
-    );
-  }
   // Steering stand with a small wheel at the centre, aft of the console.
   b.add(BRIDGE_SLOTS.console, bevelBox(0.5, 1.0, 0.45, 0.04), at(cx - 1.4, y0 + 0.5, zc + depth + 0.3));
   b.add(SLOTS.chrome, new TorusGeometry(0.15, 0.012, 6, 20), at(cx - 1.4, y0 + 1.1, zc + depth + 0.25, -0.5));

@@ -34,7 +34,7 @@ Sea State is an ocean, weather and boat simulator built on [three.js](https://th
 - **Cameras:** helm, chase, orbit, hull, drone and cinematic, plus a photo mode with depth of field.
 - **Storm Survival:** stay upright through a storm for as long as you can.
 - **Sound:** synthesized engines, wind and thunder, with CC0 field recordings of the sea and rain.
-- **Input:** keyboard, mouse and gamepad.
+- **Input:** keyboard and mouse.
 
 ## Controls
 
@@ -55,7 +55,7 @@ Sea State is an ocean, weather and boat simulator built on [three.js](https://th
 | Recover a capsized boat          | Backspace                |
 | HUD / help / pause               | H / F1 / Esc             |
 
-In Arcade the steering centres itself when you let go; in Realistic the rudder stays where you leave it. The in-game Help screen lists every control for each boat, gamepad included.
+In Arcade the steering centres itself when you let go; in Realistic the rudder stays where you leave it. The in-game Help screen lists every control for each boat.
 
 ## Run it locally
 

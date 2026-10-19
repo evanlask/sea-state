@@ -59,14 +59,13 @@
 }
 
 /* ---------------------------------------------------------------------------------------------
-   Focus: native :focus-visible for keyboard, and every focus while a gamepad is driving. */
+   Focus: native :focus-visible for the keyboard. */
 
 .menu-root :focus {
   outline: none;
 }
 
-.menu-root :focus-visible,
-.menu-root[data-input='gamepad'] :focus {
+.menu-root :focus-visible {
   outline: 2px solid var(--menu-accent);
   outline-offset: 3px;
   box-shadow: 0 0 0 0.4em rgba(111, 195, 255, 0.16);
@@ -130,7 +129,7 @@
   font-size: 0.78em;
 }
 
-/* Button hints: keyboard names by default, pad buttons while a gamepad is in use. */
+/* Button hints: the keyboard key for the action. */
 .menu-glyph {
   display: inline-grid;
   place-items: center;
@@ -152,22 +151,6 @@
 
 .menu-glyph-accept::before {
   content: 'Enter';
-}
-
-.menu-root[data-input='gamepad'] .menu-glyph {
-  width: 1.7em;
-  padding: 0;
-  border-radius: 50%;
-}
-
-.menu-root[data-input='gamepad'] .menu-glyph-back::before {
-  content: 'B';
-  color: #ff8a80;
-}
-
-.menu-root[data-input='gamepad'] .menu-glyph-accept::before {
-  content: 'A';
-  color: #8ef0b5;
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -252,7 +235,6 @@
 
 .menu-main-items > .menu-btn:hover::before,
 .menu-main-items > .menu-btn:focus-visible::before,
-.menu-root[data-input='gamepad'] .menu-main-items .menu-btn:focus::before,
 .menu-main-continue > .menu-btn:hover::before,
 .menu-main-continue > .menu-btn:focus-visible::before {
   background: var(--menu-accent);
@@ -412,8 +394,7 @@
   white-space: nowrap;
 }
 
-.menu-root .menu-tab:focus-visible,
-.menu-root[data-input='gamepad'] .menu-tab:focus {
+.menu-root .menu-tab:focus-visible {
   outline-offset: -2px;
   border-radius: 0.4em 0.4em 0 0;
   box-shadow: none;
@@ -439,10 +420,6 @@
 
 .menu-tabs-hint::before {
   content: 'PgUp / PgDn';
-}
-
-.menu-root[data-input='gamepad'] .menu-tabs-hint::before {
-  content: 'LB / RB';
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -638,8 +615,7 @@
 }
 
 /* The slider's own focus ring hugs the track; a halo on the thumb reads better. */
-.menu-root .menu-slider:focus-visible,
-.menu-root[data-input='gamepad'] .menu-slider:focus {
+.menu-root .menu-slider:focus-visible {
   outline-offset: 2px;
   border-radius: 0.4em;
 }

@@ -171,6 +171,21 @@ export class OceanSurface {
     u.rippleVariance.value = r.variance;
   }
 
+  // The lightning flash on the water (weather/flashLight.ts), or null while dark. `radiance` is the
+  // lit base's at the source and `sky` its mean over the sky, both pre-exposed.
+  setFlash(flash: { source: Vector3; baseM: number; radiance: Vector3; sky: Vector3 } | null): void {
+    const u = this.mesh.uniforms;
+    if (!flash) {
+      (u.flashRadiance.value as Vector3).set(0, 0, 0);
+      (u.flashSky.value as Vector3).set(0, 0, 0);
+      return;
+    }
+    (u.flashRadiance.value as Vector3).copy(flash.radiance);
+    (u.flashSky.value as Vector3).copy(flash.sky);
+    (u.flashSource.value as Vector3).copy(flash.source);
+    u.flashBase.value = flash.baseM;
+  }
+
   // originX/originZ: float64 world position of the render origin.
   setWorldOrigin(originX: number, originZ: number): void {
     this.mesh.setWorldOrigin(originX, originZ);

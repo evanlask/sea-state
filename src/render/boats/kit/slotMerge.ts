@@ -22,7 +22,7 @@ import {
 export const INTERIOR_SLOTS: ReadonlySet<string> = new Set(['ceiling', 'ceilingLight', 'console']);
 export const INTERIOR_MESH = 'interior';
 
-const CHANNELS = ['always', 'interior', 'deck', 'screen'] as const;
+const CHANNELS = ['always', 'interior', 'deck', 'bridge'] as const;
 
 export interface SlotGeometry {
   slot: string;

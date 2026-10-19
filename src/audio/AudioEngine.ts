@@ -318,8 +318,8 @@ export class AudioEngine {
     if (this.closed) return Promise.resolve(false);
     let ctx = this.graph?.ctx;
     if (this.unlocking) {
-      // An earlier resume() (a gamepad poll, with no activation) may still be pending, and this
-      // gesture is the one that can satisfy it: ask again.
+      // An earlier resume() (outside a user activation) may still be pending, and this gesture is
+      // the one that can satisfy it: ask again.
       if (ctx && ctx.state !== 'running' && !(this.hidden && this.settings.muteWhenHidden)) {
         void ctx.resume().catch(() => undefined);
       }
@@ -392,10 +392,7 @@ export class AudioEngine {
     this.copyListener(frame.listener, dt);
     if (frame.environment) this.setEnvironment(frame.environment);
     const g = this.graph;
-    if (!g || g.ctx.state !== 'running') {
-      this.pollGamepadUnlock();
-      return;
-    }
+    if (!g || g.ctx.state !== 'running') return;
     const ctx = g.ctx;
     const now = ctx.currentTime;
     this.frame++;
@@ -609,19 +606,6 @@ export class AudioEngine {
     } else {
       l.setPosition(p.x, p.y, p.z);
       l.setOrientation(f.x, f.y, f.z, u.x, u.y, u.z);
-    }
-  }
-
-  // Gamepad buttons aren't activation events in every browser, but try: Chrome counts them for
-  // pages with prior activation, and it costs nothing while locked.
-  private pollGamepadUnlock(): void {
-    if (this.closed || this.unlocking || typeof navigator === 'undefined' || !navigator.getGamepads) return;
-    if (this.hidden && this.settings.muteWhenHidden) return;
-    for (const pad of navigator.getGamepads()) {
-      if (pad?.buttons[0]?.pressed) {
-        void this.unlock();
-        return;
-      }
     }
   }
 

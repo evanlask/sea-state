@@ -1,9 +1,9 @@
 // MenuController: owns the menu screens over the live 3D view, a navigation stack (main → setup,
-// pause → settings, …), the confirm dialog, typed events, and gamepad navigation through
+// pause → settings, …), the confirm dialog, typed events, and arrow-key navigation through
 // FocusNavigator. Call update() each frame with the 'menu' context's MenuInput while open.
 
 import './menu.css';
-import { directionOf, FocusNavigator, type NavDirection, RepeatTimer } from '../../input/focusNav';
+import { FocusNavigator } from '../../input/focusNav';
 import type { MenuInput } from '../../input/InputManager';
 import type { SettingsStore, StorageLike } from '../../settings/store';
 import { button, h } from './dom';
@@ -68,7 +68,6 @@ export class MenuController {
   private readonly screens = new Map<ScreenId, Screen>();
   private readonly listeners = new Map<keyof MenuEventMap, Set<(payload: never) => void>>();
   private readonly navigator: FocusNavigator;
-  private readonly sliderRepeat = new RepeatTimer(0.3, 0.06);
   private readonly host: MenuHost;
   private stack: ScreenId[] = [];
   private dialog: { element: HTMLElement; restore: HTMLElement | null } | null = null;
@@ -88,7 +87,7 @@ export class MenuController {
       helmDown: false,
     };
 
-    this.element = h('div', { class: 'menu-root', attrs: { hidden: true, 'data-input': 'keyboard' } });
+    this.element = h('div', { class: 'menu-root', attrs: { hidden: true } });
     parent.append(this.element);
     this.navigator = new FocusNavigator(this.element, {
       onBack: () => this.back(),
@@ -106,10 +105,6 @@ export class MenuController {
       confirm: (o) => this.confirm(o),
     };
 
-    const signal = this.abort.signal;
-    // Mouse use hides the gamepad focus ring style; keyboard Tab keeps native :focus-visible.
-    this.element.addEventListener('pointerdown', () => this.setInputMode('pointer'), { signal });
-    this.element.addEventListener('keydown', () => this.setInputMode('keyboard'), { signal });
     if (options.keyboard) {
       window.addEventListener(
         'keydown',
@@ -121,7 +116,7 @@ export class MenuController {
           else return;
           event.preventDefault();
         },
-        { signal },
+        { signal: this.abort.signal },
       );
     }
   }
@@ -179,7 +174,7 @@ export class MenuController {
     this.display(previous);
   }
 
-  // Esc / B. Closes a dialog, pops a screen, or resumes from the pause root.
+  // Esc. Closes a dialog, pops a screen, or resumes from the pause root.
   back(): void {
     if (this.dialog) {
       this.closeDialog();
@@ -357,37 +352,11 @@ export class MenuController {
     }
   }
 
-  // --- Per-frame gamepad input --------------------------------------------------------------
+  // --- Per-frame keyboard input -------------------------------------------------------------
 
   update(menu: MenuInput, dt: number): void {
     if (this.element.hidden) return;
-    const padActive = menu.accept || ((menu.x !== 0 || menu.y !== 0) && !menu.fromKeyboard);
-    if (padActive) this.setInputMode('gamepad');
-    const active = document.activeElement;
-    // Left / right on a focused slider adjusts it instead of moving focus (the keyboard's
-    // arrows already do this natively).
-    if (active instanceof HTMLInputElement && active.type === 'range' && !menu.fromKeyboard) {
-      const dir = directionOf(menu.x, menu.y);
-      const horizontal = dir === 'left' || dir === 'right' ? dir : null;
-      const step = this.sliderRepeat.update(horizontal, dt);
-      if (step) this.nudgeSlider(active, step);
-      if (horizontal) {
-        this.navigator.update({ ...menu, x: 0, y: 0 }, dt);
-        return;
-      }
-    } else this.sliderRepeat.update(null, dt);
     this.navigator.update(menu, dt);
-  }
-
-  private nudgeSlider(input: HTMLInputElement, direction: NavDirection): void {
-    if (direction === 'left') input.stepDown();
-    else input.stepUp();
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-
-  private setInputMode(mode: 'gamepad' | 'keyboard' | 'pointer'): void {
-    if (this.element.dataset.input !== mode) this.element.dataset.input = mode;
   }
 
   dispose(): void {

@@ -404,7 +404,6 @@ export class CameraRig {
     if (this.mode === 'chase')
       this.pitchOffset = Math.min(REST_PITCH + 0.83, Math.max(REST_PITCH - 1.44, this.pitchOffset));
     this.zoom = Math.min(4, Math.max(0.35, this.zoom * Math.exp(input.zoom * 0.12)));
-    if (input.zoomStep) this.zoom = nextZoomPreset(this.zoom);
 
     this.clearance = CLEARANCE;
     this.computeTarget(dt);
@@ -730,8 +729,8 @@ export class CameraRig {
   }
 
   // ---------------------------------------------------------------------------
-  // Photo camera: detached fly camera. WASD / left stick fly along the view, Q / E (LT / RT) go
-  // down / up, mouse / right stick look; wheel (LB / RB) sets the aperture, focus follows the boat.
+  // Photo camera: detached fly camera. WASD fly along the view, Q / E go down / up, the mouse
+  // looks; the wheel (- / =) sets the aperture, focus follows the boat.
 
   private updatePhoto(dt: number, input: CameraInput, waterHeight: number): void {
     const cam = this.camera;
@@ -774,7 +773,7 @@ export class CameraRig {
     if (offset.length() > leash) cam.position.copy(boatPos).addScaledVector(offset.normalize(), leash);
 
     // Aperture: notches open (+) or close (−) it; the wheel's "zoom in" opens it.
-    const notches = input.aperture - input.zoom;
+    const notches = -input.zoom;
     this.apertureValue = Math.min(1, Math.max(0.01, this.apertureValue * Math.exp(notches * 0.15)));
     // Auto-focus on the boat, racked smoothly.
     const target = cam.position.distanceTo(
@@ -826,13 +825,4 @@ function segmentEntersCapsule(
 
 function wrapAngle(angle: number): number {
   return Math.atan2(Math.sin(angle), Math.cos(angle));
-}
-
-// The gamepad's zoom presets (chase, orbit and drone distance factors): near, normal, far.
-const ZOOM_PRESETS = [0.6, 1, 1.8] as const;
-
-// The next preset out from the current zoom (which the wheel may have left between presets), wrapping
-// from far back to near.
-export function nextZoomPreset(zoom: number): number {
-  return ZOOM_PRESETS.find((z) => z > zoom + 1e-3) ?? ZOOM_PRESETS[0];
 }

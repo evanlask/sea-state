@@ -331,29 +331,6 @@ export const SETTINGS_TABS: readonly SettingsTab[] = [
           },
         ],
       },
-      {
-        title: 'Gamepad',
-        fields: [
-          {
-            path: 'controls.gamepadSensitivity',
-            label: 'Stick sensitivity',
-            description: 'Right-stick look speed.',
-            control: range(0.1, 5, 0.1, times),
-          },
-          {
-            path: 'controls.gamepadDeadZone',
-            label: 'Dead zone',
-            description: 'Stick travel ignored around centre; raise it if the view drifts.',
-            control: range(0, 0.5, 0.01, pct),
-          },
-          {
-            path: 'controls.rumble',
-            label: 'Rumble',
-            description: 'Vibrate on wave slams and collisions.',
-            control: toggle,
-          },
-        ],
-      },
     ],
   },
   {

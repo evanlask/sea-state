@@ -43,11 +43,10 @@ export const SAILING_PRIMER: readonly Article[] = [
         'stops. That is the fastest setting. Too tight and the sail stalls: the boat leans over and slows.',
       'The sail-plan diagram helps: the sails are coloured by trim, the dashed lines show the ideal angle, the ' +
         'arrows say whether to trim in or ease out, and the telltales (streamers on the sails) all stream back when ' +
-        'it is right. Auto-trim (T or hold L3) lets the crew do it: on by default in Arcade, off in Realistic. ' +
+        'it is right. Auto-trim (T) lets the crew do it: on by default in Arcade, off in Realistic. ' +
         'Touching a sheet turns it off.',
       'Caught by a gust? Hold Space to let fly: both sheets run right out and the sails spill the wind. Let go ' +
-        'and auto-trim pulls them back in; without it they stay out until you trim (W, Q). On a gamepad, ease ' +
-        'with LT and LB.',
+        'and auto-trim pulls them back in; without it they stay out until you trim (W, Q).',
     ],
   },
   {
@@ -127,7 +126,7 @@ export const LIGHTS_PRIMER: readonly Article[] = [
     paragraphs: [
       'After dark, other boats are just lights, and their colours tell you which way they are heading. Which ' +
         'lights a boat shows is set by the international collision rules (the COLREGs). Yours start switched on: ' +
-        '1 (or N, or a tap on D-pad ↑) turns them off and on, and the HUD reminds you if they are off at night.',
+        '1 (or N) turns them off and on, and the HUD reminds you if they are off at night.',
     ],
     points: [
       {
@@ -209,31 +208,28 @@ export const LIGHTS_PRIMER: readonly Article[] = [
   },
   {
     title: 'Your other lights',
-    paragraphs: [
-      'The number keys switch each kind of light on its own, and the HUD shows which are on. On a gamepad, tap ' +
-        'a D-pad direction for the first light of a pair and hold it for the second.',
-    ],
+    paragraphs: ['The number keys switch each kind of light on its own, and the HUD shows which are on.'],
     points: [
-      { term: '1 · Navigation', text: 'Sidelights, masthead and stern lights (N, tap D-pad ↑).' },
+      { term: '1 · Navigation', text: 'Sidelights, masthead and stern lights (or N).' },
       {
         term: '2 · Deck',
-        text: 'Deck and work floods, the sailboat’s spreader lights, the center console’s T-top lights (L, tap D-pad ↓).',
+        text: 'Deck and work floods, the sailboat’s spreader lights, the center console’s T-top lights (or L).',
       },
       {
         term: '3 · Cabin',
-        text: 'Cabins, wheelhouse and accommodation: the lit windows (hold D-pad ↓).',
+        text: 'Cabins, wheelhouse and accommodation: the lit windows.',
       },
       {
         term: '4 · Signals',
         text:
           'Cycles automatic, at anchor (all-round white), restricted in ability to manoeuvre (ships only), then ' +
-          'back to automatic (hold D-pad ↑).',
+          'back to automatic.',
       },
       {
         term: '5 · Extras',
         text:
           'Searchlights on the ships and the crab boat (the cruise ship also floodlights her funnels), underwater ' +
-          'lights on the center console, the jet ski’s headlight (hold D-pad ← or →).',
+          'lights on the center console, the jet ski’s headlight.',
       },
     ],
   },
@@ -241,7 +237,7 @@ export const LIGHTS_PRIMER: readonly Article[] = [
 
 export const GAMEPLAY_TIPS: readonly string[] = [
   'Arcade: steering centres itself when you let go, the sails trim themselves, and a container ship answers in ' +
-    'seconds. Realistic: the helm stays where you leave it (X, or a click of the left stick, centres it), you ' +
+    'seconds. Realistic: the helm stays where you leave it (X centres it), you ' +
     'trim the sails yourself, and ships ' +
     'take their real minutes. Switch in Settings → Gameplay.',
   'Capsizing comes down to how you handle the boat. Big ships shrug off most storms; the crab boat, sailboat, center console and jet ski need care, and the hydroplane wants flat water.',
@@ -253,8 +249,8 @@ export const GAMEPLAY_TIPS: readonly string[] = [
   'The attitude gauge shows how far you are leaning, with a red danger zone worked out for your boat. Stay out of it.',
   'Water on deck makes the boat less stable until it drains away. Slow down and give it time.',
   'A heavy load of crab pots makes the crab boat roll over more easily. Set the pot count in voyage setup and try the same storm laden and empty.',
-  'Add boats in voyage setup or the pause menu’s Fleet screen, then switch helm with Tab or D-pad ← →.',
-  'Capsized or sunk? Backspace, hold View, or Recover boat in the pause menu puts you back upright.',
+  'Add boats in voyage setup or the pause menu’s Fleet screen, then switch helm with Tab.',
+  'Capsized or sunk? Backspace or Recover boat in the pause menu puts you back upright.',
   'A full day and night takes an hour by default (Settings → Gameplay → Day length). [ and ] jump half an hour; \\ fast-forwards.',
   'Click the view to look around with the mouse, or right-drag to orbit. Esc lets go of the mouse (and pauses from the helm view).',
   'The telemetry panel (engineering readouts) is off by default: G or Settings → HUD shows it.',

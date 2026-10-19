@@ -21,7 +21,7 @@ import {
   relativeSector,
   SPEED_UNIT_LABEL,
 } from './format';
-import type { FleetEntry, HudAlert, HudSeverity, InputDeviceKind, StabilityInfo } from './model';
+import type { FleetEntry, HudAlert, HudSeverity, StabilityInfo } from './model';
 
 export interface AlertInput {
   kind: BoatKind;
@@ -47,7 +47,6 @@ export interface AlertInput {
   navLights: boolean;
   fleet?: readonly FleetEntry[];
   units?: HudUnits;
-  device?: InputDeviceKind;
 }
 
 interface CollisionLimits {
@@ -141,7 +140,7 @@ const HEEL_ACTION: Record<Cause, string> = {
   turn: 'Ease the turn and slow down',
   surf: 'Slow down — the waves behind are pushing you',
   beam: 'Turn to meet the waves bow-first',
-  sail: 'Ease the sheets or reef to spill wind',
+  sail: 'Let fly (Space) or reef to spill wind',
   other: 'Slow down and turn into the waves',
 };
 
@@ -172,11 +171,6 @@ export function evaluateAlerts(
   t: AlertThresholds = ALERT_THRESHOLDS,
 ): HudAlert[] {
   const alerts: HudAlert[] = [];
-  // The sailboat's way out names the let-fly key on the keyboard (the pad eases with LT and LB).
-  const heelAction = (cause: Cause): string =>
-    cause === 'sail' && input.device !== 'gamepad'
-      ? 'Let fly (Space) or reef to spill wind'
-      : HEEL_ACTION[cause];
   const add = (id: string, severity: HudSeverity, text: string, detail?: string): void => {
     alerts.push(detail ? { id, severity, text, detail } : { id, severity, text });
   };
@@ -229,10 +223,10 @@ export function evaluateAlerts(
   const heavyRoll = t.heavyRoll[input.kind];
   let explained: Cause | null = null;
   if (over('capsize-risk', heel, capsizeHeel)) {
-    add('capsize-risk', 'danger', `About to capsize — ${formatDegrees(heel)} to ${side}`, heelAction(cause));
+    add('capsize-risk', 'danger', `About to capsize — ${formatDegrees(heel)} to ${side}`, HEEL_ACTION[cause]);
     explained = cause;
   } else if (over('heeling', heel, dangerHeel)) {
-    add('heeling', 'warning', `Heeling hard — ${formatDegrees(heel)} to ${side}`, heelAction(cause));
+    add('heeling', 'warning', `Heeling hard — ${formatDegrees(heel)} to ${side}`, HEEL_ACTION[cause]);
     explained = cause;
   } else if (heavyRoll !== undefined && over('heavy-roll', heel, Math.min(heavyRoll, dangerHeel * 0.9))) {
     add(
@@ -320,8 +314,7 @@ export function evaluateAlerts(
 
   // Jet skis carry no navigation lights (and shouldn't be out after dark anyway).
   if (input.isNight && !input.navLights && input.kind !== 'pwc') {
-    const key = input.device === 'gamepad' ? 'Tap D-pad up' : 'Press 1';
-    add('nav-lights-off', 'info', 'Navigation lights off', `${key} so other boats can see you`);
+    add('nav-lights-off', 'info', 'Navigation lights off', 'Press 1 so other boats can see you');
   }
 
   for (const alert of collisionAlerts(input, previous, t, units)) alerts.push(alert);
@@ -337,9 +330,6 @@ function hydroAlerts(
   t: AlertThresholds,
 ): HudAlert[] {
   const out: HudAlert[] = [];
-  const pad = input.device === 'gamepad';
-  const cut = pad ? 'B' : 'Space';
-  const wing = pad ? 'LB' : 'Q';
   const limit = bowHighPitch(input.speed, t);
   const pitch = input.pitch ?? 0;
   if (limit !== null && over('blow-over', pitch, limit + t.hydro.blowOver)) {
@@ -347,14 +337,14 @@ function hydroAlerts(
       id: 'blow-over',
       severity: 'danger',
       text: 'Blowing over — throttle off!',
-      detail: `${cut} cuts the power; ${wing} trims the wing down`,
+      detail: 'Space cuts the power; Q trims the wing down',
     });
   } else if (limit !== null && over('bow-high', pitch, limit)) {
     out.push({
       id: 'bow-high',
       severity: 'warning',
       text: 'Bow high — ease off',
-      detail: `Ease the throttle or trim the wing down (${wing})`,
+      detail: 'Ease the throttle or trim the wing down (Q)',
     });
   }
   const rudder = input.rudder;

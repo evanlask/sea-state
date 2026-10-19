@@ -267,18 +267,17 @@ export class MotionPanel implements Widget {
     const vmg = speedReading(Math.abs(sail.vmg), ctx.units.speed);
     this.vmgTxt.set(`${vmg.value} ${vmg.unit} ${sail.vmg >= 0 ? '▲ upwind' : '▼ downwind'}`);
     const advice = reefAdvice(sail.tws, sail.heel, sail.reef);
-    const device = m.controls.device;
     show(this.reefEl, advice.overpowered || advice.shakeOut);
     if (advice.overpowered && sail.reef < 3) {
       this.reefClass.set('warn');
-      this.reefTxt.set(`Overpowered — reef  [${buttonKey('reefIn', device)}]`);
+      this.reefTxt.set(`Overpowered — reef  [${buttonKey('reefIn')}]`);
     } else if (advice.overpowered) {
       this.reefClass.set('danger');
       this.reefTxt.set('Too much wind — roll up the jib, steer away from the wind');
     } else if (advice.shakeOut) {
       this.reefClass.set('info');
       this.reefTxt.set(
-        `Under-canvassed (${Math.round(msToKnots(sail.tws))} kn) — shake out  [${buttonKey('reefOut', device)}]`,
+        `Under-canvassed (${Math.round(msToKnots(sail.tws))} kn) — shake out  [${buttonKey('reefOut')}]`,
       );
     }
   }

@@ -25,7 +25,7 @@ export function autoSignals(input: SignalInput): LightSignal[] {
   return [];
 }
 
-// The player's manual signal (4 / hold D-pad up) cycles Auto → At anchor → Restricted in
+// The player's manual signal (4) cycles Auto → At anchor → Restricted in
 // ability to manoeuvre → Auto, and replaces the automatic signals while set.
 export type SignalOverride = 'anchor' | 'ram' | null;
 

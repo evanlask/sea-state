@@ -17,6 +17,7 @@ import { Vector2, Vector3, Vector4 } from 'three/webgpu';
 import { PLANET_RADIUS, zenithHorizonAngle } from '../sky/AtmosphereLuts';
 import type { AtmosphereLuts, AtmosphereUniforms } from '../sky/AtmosphereLuts';
 import { type N, tsl } from '../tsl';
+import { FLASH_FALLOFF } from '../weather/flashLight';
 import { BASE_TILE, CIRRUS_TILE, CURL_TILE, DETAIL_TILE, type CloudNoise } from './CloudNoise';
 import {
   ANVIL_BASE,
@@ -92,6 +93,9 @@ export interface MarchOptions {
   lightSteps: number;
   detail: boolean;
   maxDistance: number; // km
+  // Light the cloud from inside with the lightning flash (default on). The environment panorama
+  // leaves it out: the probe would hold a captured flash for seconds (weather/flashLight.ts).
+  flash?: boolean;
 }
 
 export interface MarchResult {
@@ -517,9 +521,11 @@ export class CloudShading {
               .mul(diffuseUp)
               .add(below.mul(0.5).mul(diffuseDown))
               .add(sunDiffuse.mul(diffuseUp.mul(0.5).add(0.5)));
-            const toFlash = length(p.sub(u.flashPosition));
-            const flash = u.flashRadiance.mul(exp(toFlash.mul(-1.4)));
-            const inScatter = direct.mul(powderMix).add(ambient).add(flash);
+            let inScatter: N = direct.mul(powderMix).add(ambient);
+            if (options.flash !== false) {
+              const toFlash = length(p.sub(u.flashPosition));
+              inScatter = inScatter.add(u.flashRadiance.mul(exp(toFlash.mul(-FLASH_FALLOFF))));
+            }
             const stepT = exp(sigma.mul(dt).negate()).toVar();
             // Energy-conserving integration (Hillaire 2016), single-scattering albedo ≈ 1.
             radiance.addAssign(inScatter.mul(stepT.oneMinus()).mul(transmittance));

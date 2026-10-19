@@ -93,7 +93,6 @@ function readAll(boat: BoatSnapshot): void {
       latitudeDeg: 45,
       longitudeDeg: 0,
       camera: 'Chase',
-      device: 'keyboard',
       lights: { nav: true, deck: false, cabin: false, extra: false, signals: [] },
       alerts: [],
     });

@@ -60,10 +60,6 @@ export class KeyState {
     return this.down.has(parseChord(chord).code);
   }
 
-  get hadInput(): boolean {
-    return this.edges.length > 0;
-  }
-
   endFrame(): void {
     this.edges = [];
   }
@@ -107,7 +103,6 @@ export class MouseState {
   orbitY = 0;
   wheel = 0;
   dragging = false;
-  hadInput = false;
 
   move(dx: number, dy: number, pointerLocked: boolean): void {
     if (pointerLocked) {
@@ -116,17 +111,13 @@ export class MouseState {
     } else if (this.dragging) {
       this.orbitX += dx;
       this.orbitY += dy;
-    } else {
-      return;
     }
-    this.hadInput = true;
   }
 
   // Browsers report pixels, lines or pages; normalise to wheel "notches".
   scroll(deltaY: number, deltaMode: number): void {
     const pixels = deltaMode === 1 ? deltaY * 40 : deltaMode === 2 ? deltaY * 800 : deltaY;
     this.wheel += pixels / 100;
-    this.hadInput = true;
   }
 
   // Window blur or a hidden tab can swallow the mouseup that ends a right-drag.
@@ -136,6 +127,5 @@ export class MouseState {
 
   endFrame(): void {
     this.lookX = this.lookY = this.orbitX = this.orbitY = this.wheel = 0;
-    this.hadInput = false;
   }
 }

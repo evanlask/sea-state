@@ -1,6 +1,5 @@
 // Canvas-generated liveries: hull rust/grime masks, names and ports of
-// registry, draft marks, the Plimsoll mark, container line logos and bridge
-// screens. All names and brands are fictional. Pure layout helpers are
+// registry, draft marks, the Plimsoll mark and container line logos. All names and brands are fictional. Pure layout helpers are
 // exported for tests; painters need a DOM canvas.
 
 import { type Texture } from 'three/webgpu';
@@ -273,82 +272,4 @@ export function containerLogoAtlas(lines: readonly ContainerLine[] = CONTAINER_L
   });
   const texture = canvasTexture(canvas, { anisotropy: 8 });
   return { texture, rows: lines.length };
-}
-
-// Bridge displays: radar PPI, ECDIS chart and conning panels on one atlas (3 columns).
-export function screenAtlas(seed = 5): Texture {
-  const W = 1536;
-  const H = 512;
-  const canvas = createCanvas(W, H);
-  const ctx = context2d(canvas);
-  const random = rng(seed);
-  // Radar.
-  ctx.fillStyle = '#020604';
-  ctx.fillRect(0, 0, 512, 512);
-  const cx = 256;
-  const cy = 256;
-  ctx.strokeStyle = 'rgba(80,255,140,0.35)';
-  ctx.lineWidth = 2;
-  for (let r = 50; r <= 230; r += 60) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-  ctx.fillStyle = 'rgba(255,190,60,0.9)';
-  for (let i = 0; i < 60; i++) {
-    const a = random() * Math.PI * 2;
-    const r = 30 + random() * 200;
-    ctx.fillRect(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 3 + random() * 6, 2 + random() * 3);
-  }
-  ctx.strokeStyle = 'rgba(120,255,170,0.8)';
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx, cy - 230);
-  ctx.stroke();
-  // ECDIS.
-  ctx.fillStyle = '#0c1d33';
-  ctx.fillRect(512, 0, 512, 512);
-  ctx.fillStyle = '#284a6e';
-  for (let i = 0; i < 8; i++) {
-    ctx.beginPath();
-    ctx.ellipse(
-      512 + random() * 512,
-      random() * 512,
-      40 + random() * 120,
-      20 + random() * 70,
-      random() * 3,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fill();
-  }
-  ctx.fillStyle = '#5e5233';
-  ctx.beginPath();
-  ctx.moveTo(512, 380);
-  ctx.bezierCurveTo(700, 330, 820, 470, 1024, 420);
-  ctx.lineTo(1024, 512);
-  ctx.lineTo(512, 512);
-  ctx.fill();
-  ctx.strokeStyle = '#ff5ad1';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(560, 470);
-  ctx.lineTo(760, 260);
-  ctx.lineTo(980, 120);
-  ctx.stroke();
-  // Conning panel.
-  ctx.fillStyle = '#0a0d10';
-  ctx.fillRect(1024, 0, 512, 512);
-  ctx.fillStyle = '#7ec8ff';
-  ctx.font = '600 42px Arial, sans-serif';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ['HDG 274.6', 'SOG 18.2 kn', 'RPM  82', 'ROT +2.1', 'RUD 3° P'].forEach((t, i) =>
-    ctx.fillText(t, 1060, 40 + i * 70),
-  );
-  ctx.strokeStyle = '#2f3b46';
-  ctx.strokeRect(1040, 410, 480, 80);
-  ctx.fillStyle = '#3aa86b';
-  ctx.fillRect(1044, 414, 300, 72);
-  return canvasTexture(canvas, { anisotropy: 4 });
 }

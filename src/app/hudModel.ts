@@ -22,7 +22,6 @@ import type {
   FleetEntry,
   HudAlert,
   HudModel,
-  InputDeviceKind,
   JetBucket,
   LightsState,
   Propulsion,
@@ -152,7 +151,6 @@ export interface HudInputs {
   latitudeDeg: number;
   longitudeDeg: number;
   camera: string;
-  device: InputDeviceKind;
   lights: LightsState;
   alerts: readonly HudAlert[];
   units?: HudUnits; // hud.units; defaults to knots and metres
@@ -273,7 +271,7 @@ export class HudModelBuilder {
       alerts: inputs.alerts,
       fleet: this.fleet(inputs, player),
       camera: inputs.camera,
-      controls: { device: inputs.device, hints: hintRowsFor(kind) },
+      controls: { hints: hintRowsFor(kind) },
     };
     model.alerts = sortAlerts([...inputs.alerts, ...this.alerts(model, player.telemetry, dt, inputs.units)]);
     return model;
@@ -288,16 +286,20 @@ export class HudModelBuilder {
     units: HudUnits | undefined,
   ): HudAlert[] {
     const extra: HudAlert[] = [];
-    const recover = model.controls.device === 'gamepad' ? 'Hold View' : 'Press Backspace';
     if ((t['capsized'] ?? 0) > 0.5) {
-      extra.push({ id: 'capsized', severity: 'danger', text: 'Capsized', detail: `${recover} to recover` });
+      extra.push({
+        id: 'capsized',
+        severity: 'danger',
+        text: 'Capsized',
+        detail: 'Press Backspace to recover',
+      });
     } else if (model.propulsion?.type === 'turbine' && model.propulsion.killed) {
       // Upright again after a capsize, but the kill switch has cut the turbine.
       extra.push({
         id: 'kill-switch',
         severity: 'warning',
         text: 'Turbine shut down by the kill switch',
-        detail: `${recover} to recover and relight it`,
+        detail: 'Press Backspace to recover and relight it',
       });
     }
     const kind = model.boat.kind;
@@ -352,7 +354,6 @@ export class HudModelBuilder {
         navLights: model.lights.nav,
         fleet: model.fleet,
         units,
-        device: model.controls.device,
       },
       this.shownAlerts,
     );

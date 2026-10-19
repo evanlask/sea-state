@@ -46,7 +46,6 @@ export const SLOTS = {
   lampRed: 'lampRed',
   lampGreen: 'lampGreen',
   flood: 'flood', // floodlight lenses
-  screen: 'screen',
 } as const;
 
 const put = (b: PartBuilder, slot: string, g: BufferGeometry, m: Matrix4, local?: Matrix4): void => {

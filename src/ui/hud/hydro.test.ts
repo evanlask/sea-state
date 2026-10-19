@@ -55,9 +55,6 @@ describe('hydroplane alerts', () => {
       severity: 'danger',
       detail: 'Space cuts the power; Q trims the wing down',
     });
-    expect(evaluateAlerts({ ...base, pitch: 7.5 * DEG, device: 'gamepad' })[0]?.detail).toBe(
-      'B cuts the power; LB trims the wing down',
-    );
     expect(ids({ speed: 60 * MPH, pitch: 8 * DEG })).toEqual([]);
     // Held a little below the line once up.
     expect(ids({ pitch: 3.6 * DEG }, new Set(['bow-high']))).toEqual(['bow-high']);

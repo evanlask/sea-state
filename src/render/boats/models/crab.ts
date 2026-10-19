@@ -50,6 +50,7 @@ import {
   webbingMaterial,
   windowFacadeMaterial,
 } from '../kit/materials';
+import { wellVolume } from '../kit/plan';
 import {
   bollard,
   domeAntenna,
@@ -92,7 +93,9 @@ const STACK_X = 1.1; // exhaust stacks, either side just aft of the wheelhouse
 const STACK_Z = WH_AFT + 0.25;
 const STACK_R = 0.14;
 const STACK_TOP = 10.1;
-const BULWARK_H = 1.1;
+export const BULWARK_H = 1.1;
+export const BULWARK_FROM = HOUSE_FRONT + 0.4; // z where the bulwarks start, beside the house
+const BULWARK_FLARE = 0.08; // outward per metre up
 const POT_DECK_Z0 = -2.6;
 // Pots fill the deck tier by tier, as high as the load needs (the sim's PotStackSpec: 24 a tier,
 // 200 pots ≈ 9 tiers).
@@ -173,7 +176,7 @@ function structure(lines: HullLines, lod: number): CrabParts {
   });
   b.addData(SLOTS.hull, wb.sides).addData('whaleTop', wb.top).addData(SLOTS.house, wb.bulkhead);
   // Bulwarks with freeing ports around the working deck.
-  const sB = lines.sAt(HOUSE_FRONT + 0.4);
+  const sB = lines.sAt(BULWARK_FROM);
   const ports: { z0: number; z1: number }[] = [];
   for (let z = -2; z < lines.zStern - 1.2; z += 2.6) ports.push({ z0: z, z1: z + 0.9 });
   if (lod < 2) {
@@ -185,7 +188,7 @@ function structure(lines: HullLines, lod: number): CrabParts {
         stations: lod === 0 ? 40 : 14,
         height: BULWARK_H,
         thickness: 0.12,
-        flare: 0.08,
+        flare: BULWARK_FLARE,
         ports: lod === 0 ? ports : [],
         portHeight: 0.3,
       }),
@@ -583,6 +586,38 @@ export function crabPotsPerTier(): number {
   });
 }
 
+// Water-mask volume of the open deck, the bulwarks' length (side decks and working deck): from
+// inside the hull (overlapping the physics hull) out into the bulwark plating, which follows the deck
+// edge and its flare, up past the capping rail by the ocean's mask margin (WaterMask MARGIN). No sea
+// shows on deck or in the freeing ports while the water outside is below the rail.
+export function deckWellMask(lines: HullLines): BufferGeometry {
+  const zFront = BULWARK_FROM;
+  const zAft = lines.zStern - 0.08; // inside the transom bulwark
+  const n = Math.ceil((zAft - zFront) / 0.5);
+  return wellVolume(
+    zFront,
+    zAft,
+    (z) => {
+      const yd = lines.deckY(z);
+      const y0 = yd - 1;
+      const top = yd + BULWARK_H + 0.05;
+      const below = lines.halfBreadthAt(z, y0) - 0.02;
+      const edge = lines.deckHalf(z) - 0.02;
+      const rail = edge + BULWARK_FLARE * (top - yd);
+      // Counter-clockwise seen from aft, so the loft faces out.
+      return [
+        [-below, y0],
+        [below, y0],
+        [edge, yd],
+        [rail, top],
+        [-rail, top],
+        [-edge, yd],
+      ];
+    },
+    n,
+  );
+}
+
 export function crabDraft(potCount = DEFAULT_POT_COUNT): ModelDraft {
   const volume = spec.mass / RHO_SEAWATER;
   const lines = createHullLines(spec.hull, volume);
@@ -677,9 +712,7 @@ export function crabDraft(potCount = DEFAULT_POT_COUNT): ModelDraft {
   ];
   const physics = generateHull({ ...spec.hull, targetVolume: volume });
   // Water mask: the canoe body plus the deck well inside the bulwarks.
-  const well = new BoxGeometry(lines.deckHalf(6) * 2 - 0.3, BULWARK_H + 1.2, lines.zStern - HOUSE_AFT - 0.4);
-  well.translate(0, lines.deckY(6) + (BULWARK_H + 1.2) / 2 - 1.2, (HOUSE_AFT + lines.zStern) / 2);
-  const mask = merge([triMeshGeometry(physics.mesh), well]);
+  const mask = merge([triMeshGeometry(physics.mesh), deckWellMask(lines)]);
   return {
     kind: 'crab',
     name: BOAT_CARDS.crab.name,

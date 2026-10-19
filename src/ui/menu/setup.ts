@@ -155,7 +155,7 @@ export function formatDate(date: string): string {
 
 const DAY_MS = 86_400_000;
 
-// Day of year (1-based) for a gamepad-friendly date slider.
+// Day of year (1-based) for a slider-friendly date slider.
 export function dayOfYear(date: string): number {
   const d = parseDate(date) ?? new Date(Date.UTC(2026, 0, 1));
   return Math.round((d.getTime() - Date.UTC(d.getUTCFullYear(), 0, 1)) / DAY_MS) + 1;

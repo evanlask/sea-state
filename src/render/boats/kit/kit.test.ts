@@ -82,8 +82,19 @@ describe('hull loft', () => {
       height: 1,
       ports: [{ z0: -10, z1: -8 }],
     });
-    // The port adds two stations but drops the foot quads across its span.
-    expect(triangleCountOf(ported)).toBeLessThan(triangleCountOf(plain) + 2 * 2 * 5 * 2);
+    // The port adds two stations and its jambs, drops the foot quads across its span and closes it
+    // over with a lintel.
+    expect(triangleCountOf(ported)).toBeLessThan(triangleCountOf(plain) + 2 * (2 * 5 + 2) * 2);
+    const facing = (m: typeof ported, axis: number, sign: number): number => {
+      let n = 0;
+      for (let i = axis; i < m.normals.length; i += 3) if (m.normals[i]! * sign > 0.99) n++;
+      return n;
+    };
+    // Lintels face down, the jambs along the hull (4 vertices each, both sides); the plain bulwark has neither.
+    expect(facing(ported, 1, -1)).toBeGreaterThan(0);
+    expect(facing(ported, 2, 1)).toBe(8);
+    expect(facing(ported, 2, -1)).toBe(8);
+    expect(facing(plain, 1, -1) + facing(plain, 2, 1) + facing(plain, 2, -1)).toBe(0);
   });
 
   it('places hull patches just outside the shell', () => {

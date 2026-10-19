@@ -65,7 +65,6 @@ describe('heel alerts', () => {
       'Ease the turn and slow down',
     );
     expect(action({ kind: 'sail' })).toBe('Let fly (Space) or reef to spill wind');
-    expect(action({ kind: 'sail', device: 'gamepad' })).toBe('Ease the sheets or reef to spill wind');
   });
 
   it("drops the cause's own alert while the heel alert explains it", () => {
@@ -149,15 +148,12 @@ describe('sailing and lights alerts', () => {
     expect(ids({ kind: 'crab', inIrons: true })).toEqual([]);
   });
 
-  it('reminds about navigation lights after dark with the key for the device, except on a jet ski', () => {
+  it('reminds about navigation lights after dark with the key, except on a jet ski', () => {
     expect(first({ isNight: true })).toMatchObject({
       id: 'nav-lights-off',
       severity: 'info',
       detail: 'Press 1 so other boats can see you',
     });
-    expect(first({ isNight: true, device: 'gamepad' }).detail).toBe(
-      'Tap D-pad up so other boats can see you',
-    );
     expect(ids({ isNight: true, navLights: true })).toEqual([]);
     expect(ids({ isNight: true, kind: 'pwc' })).toEqual([]);
   });

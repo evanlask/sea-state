@@ -8,7 +8,6 @@ import type { ColorRepresentation, Material } from 'three/webgpu';
 import type { BoatKind } from '../../../sim/world/protocol';
 import { boatDetail } from '../detail/detail';
 import { BRIDGE_SLOTS } from './bridge';
-import { screenAtlas } from './liveries';
 import {
   type AoVolume,
   deckMaterial,
@@ -110,13 +109,6 @@ export function createSlotMaterials(
     [SLOTS.lampRed]: lampMaterial({ color: 0xff2010, nits: 3000, channel: 'interior', base: 0x801010 }),
     [SLOTS.lampGreen]: lampMaterial({ color: 0x10ff60, nits: 3000, channel: 'interior', base: 0x106030 }),
     [SLOTS.flood]: lampMaterial({ color: 0xffd9a0, nits: 40000, channel: 'deck', base: 0xc8c8c0 }),
-    [SLOTS.screen]: lampMaterial({
-      color: 0xffffff,
-      nits: 160,
-      channel: 'screen',
-      map: screenAtlas(),
-      base: 0x050505,
-    }),
     [BRIDGE_SLOTS.frame]: simpleMaterial({ color: 0x22262a, roughness: 0.5, ao, name: 'frame' }),
     [BRIDGE_SLOTS.floor]: simpleMaterial({ color: 0x3b3f42, roughness: 0.8, ao, name: 'floor' }),
     [BRIDGE_SLOTS.console]: simpleMaterial({ color: 0x2c3034, roughness: 0.55, ao, name: 'console' }),
@@ -124,7 +116,7 @@ export function createSlotMaterials(
     [BRIDGE_SLOTS.ceilingLight]: lampMaterial({
       color: 0xfff4e6,
       nits: 220,
-      channel: 'screen',
+      channel: 'bridge',
       base: 0xeeeeee,
     }),
     windows: windowFacadeMaterial({

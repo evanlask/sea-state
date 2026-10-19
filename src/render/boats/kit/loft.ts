@@ -350,6 +350,7 @@ export function bulwarks(lines: HullLines, options: BulwarkOptions): MeshData {
     const indices: number[] = [];
     // Per station: outer foot, outer port-top, outer top, inner top, inner port-top, inner foot.
     const ring = 6;
+    const stations: [number, number, number][][] = [];
     for (const z of zList) {
       const lift = options.lift?.(z) ?? 0;
       const half = lines.deckHalf(z) + lift * (options.liftFlare ?? 0.06);
@@ -368,7 +369,31 @@ export function bulwarks(lines: HullLines, options: BulwarkOptions): MeshData {
         positions.push(side * x, y, z);
         uvs.push(z - lines.zBow, y);
       }
+      stations.push(pts.map(([x, y]): [number, number, number] => [side * x, y, z]));
     }
+    // A freeing port's lintel and jambs, flat-shaded (their own vertices), so the opening reads as
+    // cut through solid plating rather than a gap under it. Wound to face `normal`.
+    type P = [number, number, number];
+    const face = (quad: [P, P, P, P], normal: P, uv: (p: P) => [number, number]): void => {
+      const base = positions.length / 3;
+      for (const p of quad) {
+        positions.push(...p);
+        uvs.push(...uv(p));
+      }
+      const [a, b, c] = quad;
+      const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]] as const;
+      const e2 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]] as const;
+      const facing =
+        (e1[1] * e2[2] - e1[2] * e2[1]) * normal[0] +
+        (e1[2] * e2[0] - e1[0] * e2[2]) * normal[1] +
+        (e1[0] * e2[1] - e1[1] * e2[0]) * normal[2];
+      if (facing >= 0) indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+      else indices.push(base, base + 2, base + 1, base, base + 3, base + 2);
+    };
+    const jamb = (i: number, dir: number): void => {
+      const s = stations[i]!;
+      face([s[0]!, s[1]!, s[4]!, s[5]!], [0, 0, dir], (p) => [Math.abs(p[0]), p[1]]);
+    };
     for (let i = 0; i + 1 < zList.length; i++) {
       const open = inPort(zList[i]!, zList[i + 1]!);
       for (let k = 0; k < ring - 1; k++) {
@@ -380,6 +405,12 @@ export function bulwarks(lines: HullLines, options: BulwarkOptions): MeshData {
         if (side > 0) indices.push(a, b, c, b, d, c);
         else indices.push(a, c, b, b, c, d);
       }
+      if (!open) continue;
+      const s0 = stations[i]!;
+      const s1 = stations[i + 1]!;
+      face([s0[1]!, s0[4]!, s1[4]!, s1[1]!], [0, -1, 0], (p) => [p[2] - lines.zBow, Math.abs(p[0])]);
+      if (i === 0 || !inPort(zList[i - 1]!, zList[i]!)) jamb(i, 1);
+      if (i + 2 >= zList.length || !inPort(zList[i + 1]!, zList[i + 2]!)) jamb(i + 1, -1);
     }
     parts.push(pack(positions, uvs, indices));
   }

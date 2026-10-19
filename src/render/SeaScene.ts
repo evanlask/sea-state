@@ -7,6 +7,7 @@ import {
   Box3,
   Color,
   Frustum,
+  HemisphereLight,
   Matrix3,
   Matrix4,
   Mesh,
@@ -82,6 +83,7 @@ import { PostPipeline } from './post/PostPipeline';
 import type { DofSettings, PostPlan, PostSettings } from './post/postSettings';
 import { moonIlluminanceToa } from './sky/atmosphereParams';
 import { SkySystem } from './sky/SkySystem';
+import { flashSkyGlow } from './weather/flashLight';
 import { rainFallSpeed } from './weather/rainMath';
 
 export interface SeaSceneOptions {
@@ -161,6 +163,9 @@ const viewProjection = new Matrix4();
 const sailBounds = new Sphere();
 const cameraForward = new Vector3();
 const scratchVector = new Vector3();
+const flashRadiance = new Vector3();
+const flashSky = new Vector3();
+const FLASH_SEA_BOUNCE = 0.06; // share of the flash's sky light the sea gives back from below
 
 // Body-frame box swept by a rig's boom, mainsail and genoa: a column about the mast, as far out as
 // the boom reaches (the genoa's clew stays inside it), up to the masthead.
@@ -199,6 +204,8 @@ export class SeaScene {
   readonly clouds: CloudSystem;
   readonly contrails: ContrailSystem; // the rare jet and its trail, above the clouds
   private light: SunMoonLight;
+  // The lightning's sky light on the boats (dark between flashes), which the probe leaves out.
+  private readonly flashLight = new HemisphereLight(0xffffff, 0xffffff, 0);
   private probe: EnvironmentProbe;
   private ocean: OceanSurface;
   private water: WaterOptics;
@@ -275,6 +282,7 @@ export class SeaScene {
     this.scene.add(this.lightPool.object);
     this.fleetLights = new FleetLightPool(FLEET_LIGHTS[options.quality]);
     this.scene.add(this.fleetLights.object);
+    this.scene.add(this.flashLight);
     this.clouds = new CloudSystem(renderer, this.sky, { quality: options.quality, settings: options.clouds });
     this.contrails = new ContrailSystem(this.sky, options.seed);
     this.clouds.applyTo(this.scene, (direction, sky) => this.contrails.composite(direction, sky));
@@ -428,6 +436,7 @@ export class SeaScene {
       flash: this.fx.flash,
       groundIlluminance: this.light.illuminanceLux,
     });
+    this.updateFlash(frame.camera, preExposure);
     this.contrails.update(frame.time, frame.camera, weather);
 
     const seaWind = frame.seaWind ?? weather.windVelocity;
@@ -617,6 +626,26 @@ export class SeaScene {
     pipeline.render();
     // The shadow cascades bind to the first camera rendered, so the probe's cube camera goes after.
     this.probe.update(this.renderer, time, this.exposure.preExposure);
+  }
+
+  // Lightning on the sea and the boats for exactly as long as the flash lasts (weather/flashLight.ts):
+  // the probe leaves it out, so the ocean shades the lit cloud base itself and a hemisphere light
+  // carries the base's glow to the boats.
+  private updateFlash(camera: PerspectiveCamera, preExposure: number): void {
+    const flash = this.clouds.flashLight;
+    if (!flash) {
+      this.ocean.setFlash(null);
+      this.flashLight.intensity = 0;
+      return;
+    }
+    flashRadiance.copy(flash.radiance).multiplyScalar(preExposure);
+    flashSky.copy(flashRadiance).multiplyScalar(flashSkyGlow(camera.position, flash.source, flash.baseM));
+    this.ocean.setFlash({ source: flash.source, baseM: flash.baseM, radiance: flashRadiance, sky: flashSky });
+    // A sky of mean radiance L gives an irradiance of π·L.
+    const peak = Math.max(flashSky.x, flashSky.y, flashSky.z, 1e-12);
+    this.flashLight.color.setRGB(flashSky.x / peak, flashSky.y / peak, flashSky.z / peak);
+    this.flashLight.groundColor.copy(this.flashLight.color).multiplyScalar(FLASH_SEA_BOUNCE);
+    this.flashLight.intensity = Math.PI * peak;
   }
 
   // The boats (all the opaque geometry there is) for the ocean's SSR trace; the debug overlays,

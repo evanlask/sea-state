@@ -59,9 +59,6 @@ export interface AudioSettings {
 export interface ControlSettings {
   mouseSensitivity: number;
   invertY: boolean;
-  gamepadDeadZone: number;
-  gamepadSensitivity: number;
-  rumble: boolean;
 }
 
 interface PhysicsSettings {
@@ -180,9 +177,6 @@ export const SETTINGS_SPEC: Spec<Settings> = {
   controls: {
     mouseSensitivity: num(1, 0.1, 5),
     invertY: bool(false),
-    gamepadDeadZone: num(0.15, 0, 0.5),
-    gamepadSensitivity: num(1, 0.1, 5),
-    rumble: bool(true),
   },
   physics: {
     mode: oneOf<PhysicsMode>('arcade', ['arcade', 'realistic']),

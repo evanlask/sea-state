@@ -1,6 +1,6 @@
 // Uniforms shared by every boat material: the frame's pre-exposure (emissive
 // surfaces are authored in cd/m² and must be pre-exposed like the sky and
-// lights), how dark it is (bridge screens dim for night vision), the light
+// lights), how dark it is (bridge lighting dims for night vision), the light
 // switches the game or lab toggles, and how wet the boats are.
 
 import { type N, tsl } from '../../tsl';
@@ -9,7 +9,7 @@ const { uniform } = tsl;
 
 export interface BoatEnvironment {
   preExposure: N; // Exposure.preExposure
-  night: N; // 0 = day … 1 = full night (dims screens, raises cabin occupancy)
+  night: N; // 0 = day … 1 = full night (dims the bridge lighting, raises cabin occupancy)
   interior: N; // 0..1 accommodation/cabin/wheelhouse lights
   deck: N; // 0..1 deck floodlights (lens glow; real lights are driven by BoatVisual)
   wetness: N; // 0..1 rain and spray on the boats (wetness.ts): darker, glossier decks, streaky walls

@@ -25,13 +25,7 @@ function controlsTable(context: PollContext): HTMLElement {
     buildHelpTables(context).map((table) =>
       section(table.title, [
         h('table', { class: 'menu-table menu-help-table' }, [
-          h('thead', {}, [
-            h('tr', {}, [
-              h('th', { text: 'Action' }),
-              h('th', { text: 'Keyboard' }),
-              h('th', { text: 'Gamepad' }),
-            ]),
-          ]),
+          h('thead', {}, [h('tr', {}, [h('th', { text: 'Action' }), h('th', { text: 'Keyboard' })])]),
           h(
             'tbody',
             {},
@@ -42,7 +36,6 @@ function controlsTable(context: PollContext): HTMLElement {
                   h('div', { class: 'menu-help-desc', text: row.description }),
                 ]),
                 h('td', {}, [keys(row.keyboard)]),
-                h('td', {}, [keys(row.gamepad)]),
               ]),
             ),
           ),
@@ -52,7 +45,7 @@ function controlsTable(context: PollContext): HTMLElement {
   );
 }
 
-// Text blocks are focusable so a gamepad can step (and scroll) through them.
+// Text blocks are focusable so the arrow keys can step (and scroll) through them.
 const focusable = <T extends HTMLElement>(el: T): T => {
   el.tabIndex = 0;
   el.classList.add('menu-readable');

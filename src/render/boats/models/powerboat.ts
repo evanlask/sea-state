@@ -2,10 +2,10 @@
 // the physics planing hull: navy clear-coated topsides with side graphics over
 // a white bottom with lifting strakes and chine flats, black rub rail with a
 // stainless insert, a raised casting deck and bow seating, the console with a
-// wrap-around windshield, lit multifunction displays, tilt wheel and twin
-// throttles, a T-top hardtop (radar dome, antennas, outriggers, rocket-launcher
-// rod holders, all-round light), leaning post, transom bench, flush rod holders,
-// bow rail and twin 300 hp V8 outboards on the transom that steer and trim.
+// wrap-around windshield, tilt wheel and twin throttles, a T-top hardtop
+// (radar dome, antennas, outriggers, rocket-launcher rod holders, all-round
+// light), leaning post, transom bench, flush rod holders, bow rail and twin
+// 300 hp V8 outboards on the transom that steer and trim.
 //
 // Animated (drives): 'outboard:i:steer' (steering), 'outboard:i:trim'
 // (eng{i}Trim, 0..1 → −6..14°), 'outboard:i:prop' (eng{i}Rpm, eng{i}Throttle),
@@ -48,7 +48,6 @@ import {
   type AoVolume,
   fabricMaterial,
   hullPaintMaterial,
-  lampMaterial,
   nonSkidMaterial,
   simpleMaterial,
 } from '../kit/materials';
@@ -365,17 +364,7 @@ function structure(lines: HullLines, lod: number): PartBuilder {
   b.add('gelcoat', bevelBox(1.1, 0.38, 0.32, 0.03), at(0, SOLE_Y + 0.19, C.front - 0.17));
   b.add('cushion', slab(1.1, 0.34, 0.09, 0.06, 0.035), at(0, SOLE_Y + 0.38, C.front - 0.17));
   b.add('cushion', bevelBox(1.0, 0.36, 0.08, 0.035), at(0, 1.03, C.front - 0.04));
-  // Dash: two lit multifunction displays in black bezels, switch panel, compass.
-  const dashTilt = -Math.atan2(0.22, 0.32);
-  const dashC = { y: (1.4 + 1.08) / 2, z: (-0.74 + -0.52) / 2 };
-  for (const [i, x] of [-0.22, 0.22].entries()) {
-    b.add(SLOTS.black, bevelBox(0.44, 0.29, 0.03, 0.01), at(x, dashC.y, dashC.z + 0.012, dashTilt));
-    b.add(
-      'mfd',
-      atlasPlane(0.4, 0.25, i === 0 ? [0, 0] : [0.5, 0], i === 0 ? [0.5, 1] : [1, 1]),
-      at(x, dashC.y, dashC.z + 0.029, dashTilt),
-    );
-  }
+  // Dash: switch panel, compass.
   b.add(SLOTS.black, bevelBox(0.5, 0.012, 0.18, 0.004), at(-0.25, 1.086, -0.41));
   b.add(SLOTS.black, cylinder(0.08, 0.05, 14), at(0, 1.425, -0.92));
   b.add('acrylic', cylinder(0.065, 0.06, 14, 0.035), at(0, 1.47, -0.92));
@@ -810,73 +799,6 @@ function decals(lines: HullLines, ao: AoVolume | null): Mesh[] {
   return out;
 }
 
-// Daylight multifunction displays: a chart plotter (left half) and a sonar / fish-finder (right half).
-function mfdTexture(): CanvasTexture {
-  const W = 1024;
-  const H = 320;
-  const canvas = createCanvas(W, H);
-  const ctx = context2d(canvas);
-  const half = W / 2;
-  ctx.fillStyle = '#9fd2ee';
-  ctx.fillRect(0, 0, half, H);
-  ctx.fillStyle = '#c8e6f6';
-  ctx.beginPath();
-  ctx.ellipse(half * 0.35, H * 0.55, half * 0.32, H * 0.3, 0.4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#e8d9a8';
-  ctx.beginPath();
-  ctx.moveTo(0, H * 0.15);
-  ctx.bezierCurveTo(half * 0.3, H * 0.25, half * 0.45, 0, half * 0.7, H * 0.08);
-  ctx.lineTo(half * 0.7, 0);
-  ctx.lineTo(0, 0);
-  ctx.fill();
-  ctx.strokeStyle = '#d43a8a';
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(half * 0.5, H * 0.95);
-  ctx.lineTo(half * 0.62, H * 0.5);
-  ctx.lineTo(half * 0.85, H * 0.2);
-  ctx.stroke();
-  ctx.fillStyle = '#20262c';
-  ctx.fillRect(0, H - 34, half, 34);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '600 22px Arial, sans-serif';
-  ctx.fillText('SOG 28.4 kn   COG 112°   DEPTH 41 ft', 12, H - 10);
-  // Sonar: deep blue water column, a bright bottom return and a few fish arches.
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#0a2a6e');
-  g.addColorStop(1, '#06184a');
-  ctx.fillStyle = g;
-  ctx.fillRect(half, 0, half, H);
-  ctx.beginPath();
-  ctx.moveTo(half, H * 0.7);
-  for (let x = 0; x <= half; x += 16) ctx.lineTo(half + x, H * (0.68 + 0.06 * Math.sin(x / 40)));
-  ctx.lineTo(W, H);
-  ctx.lineTo(half, H);
-  ctx.closePath();
-  ctx.fillStyle = '#e8402a';
-  ctx.fill();
-  ctx.fillStyle = '#f2d23a';
-  ctx.fillRect(half, H * 0.66, half, 6);
-  for (const [x, y] of [
-    [0.3, 0.35],
-    [0.55, 0.42],
-    [0.72, 0.3],
-  ] as const) {
-    ctx.strokeStyle = '#f2d23a';
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.arc(half + x * half, y * H + 10, 14, Math.PI * 1.1, Math.PI * 1.9);
-    ctx.stroke();
-  }
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('41.2 ft   68.4°F', half + 12, 30);
-  const tex = trackTexture(new CanvasTexture(canvas));
-  tex.colorSpace = SRGBColorSpace;
-  tex.anisotropy = 4;
-  return tex;
-}
-
 const detail = (part: string) => boatDetail('powerboat', part);
 
 export function powerboatDraft(): ModelDraft {
@@ -988,14 +910,6 @@ export function powerboatDraft(): ModelDraft {
         name: 'stainless',
       }),
       acrylic: simpleMaterial({ color: 0x0a0e11, roughness: 0.04, name: 'acrylic' }),
-      mfd: lampMaterial({
-        color: 0xffffff,
-        nits: 700,
-        channel: 'screen',
-        map: mfdTexture(),
-        base: 0x585858,
-        name: 'mfd',
-      }),
       cowl: simpleMaterial({
         color: 0xf2f2ef,
         roughness: 0.22,

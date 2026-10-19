@@ -1,7 +1,7 @@
 // Transient alerts (centre) and the camera label + control hints (bottom centre).
 // Alerts slide in when their id first appears, stay while the model keeps them (info ones
-// fade after a few seconds), and fade out once cleared. Hints show after the boat, camera
-// or input device changes, then fade away.
+// fade after a few seconds), and fade out once cleared. Hints show after the boat or camera
+// changes, then fade away.
 
 import { build, show, TextSlot, toggle } from '../dom';
 import type { HudAlert, HudModel } from '../model';
@@ -153,12 +153,9 @@ export class HintsBar implements Widget {
     this.camera.set(m.camera);
     toggle(this.cameraEl, 'is-faded', now - this.cameraAt > CAMERA_SECONDS);
 
-    const device = m.controls.device;
-    const keysOf = (row: { keyboard: string; gamepad: string }): string =>
-      device === 'gamepad' ? row.gamepad : row.keyboard;
-    // Rows with nothing bound on this device ('—') are noise here.
-    const rows = m.controls.hints.filter((row) => keysOf(row) && keysOf(row) !== '—').slice(0, MAX_HINTS);
-    const key = `${m.boat.kind}|${device}|${rows.map((r) => r.label).join(',')}`;
+    // Rows with no key bound ('—') are noise here.
+    const rows = m.controls.hints.filter((row) => row.keyboard && row.keyboard !== '—').slice(0, MAX_HINTS);
+    const key = `${m.boat.kind}|${rows.map((r) => r.label).join(',')}`;
     if (key !== this.hintKey) {
       this.hintKey = key;
       this.hintsAt = now;
@@ -167,7 +164,7 @@ export class HintsBar implements Widget {
           const chip = document.createElement('span');
           chip.className = 'hint';
           const kbd = document.createElement('kbd');
-          kbd.textContent = keysOf(row);
+          kbd.textContent = row.keyboard;
           chip.append(kbd, row.label);
           return chip;
         }),

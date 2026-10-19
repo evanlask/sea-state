@@ -192,7 +192,7 @@ export function createSetupScreen(host: MenuHost): Screen {
     section('Fleet companions', [
       h('p', {
         class: 'menu-note',
-        text: 'Optional. They sail alongside on autopilot; switch helm any time with Tab or the D-pad.',
+        text: 'Optional. They sail alongside on autopilot; switch helm any time with Tab.',
       }),
       h(
         'div',

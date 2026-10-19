@@ -61,9 +61,6 @@ export const SETTING_APPLY_MODE: Readonly<Record<SettingsPath, ApplyMode>> = {
   // InputManager.updateSettings.
   'controls.mouseSensitivity': 'instant',
   'controls.invertY': 'instant',
-  'controls.gamepadDeadZone': 'instant',
-  'controls.gamepadSensitivity': 'instant',
-  'controls.rumble': 'instant',
   // Sim commands (setPhysicsMode, setCapsizeAssist) and the panel's visibility.
   'physics.mode': 'instant',
   'physics.capsizeAssist': 'instant',

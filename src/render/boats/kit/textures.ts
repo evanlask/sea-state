@@ -1,6 +1,6 @@
 // Procedural textures generated at load time and cached: a tileable
 // multi-octave noise texture that drives all weathering (sampled in body
-// space), and small canvas helpers for liveries, screens and decals.
+// space), and small canvas helpers for liveries and decals.
 
 import {
   CanvasTexture,

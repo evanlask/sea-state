@@ -3,7 +3,7 @@
 // intake grate and ride plate under a sculpted red upper deck (domed hood with
 // racing stripes and side graphics, footwells with raised lips, stepped
 // three-seat saddle, rear boarding platform with mats, step and tow eye),
-// steering pod with a lit display, handlebars, mirrors and a small visor, the
+// steering pod, handlebars, mirrors and a small visor, the
 // jet nozzle and reverse bucket at the transom, and a rider in a life vest
 // holding the bars: the skinned character (rider/) on the near LODs once it has
 // loaded, else (and on the far LOD) a procedural figure.
@@ -42,7 +42,6 @@ import { type ModelDraft, triMeshGeometry } from '../kit/assemble';
 import type { LightMountSpec } from '../kit/BoatVisual';
 import {
   at,
-  atlasPlane,
   bevelBox,
   cylinder,
   lathe,
@@ -283,7 +282,7 @@ function structure(lines: HullLines, lod: number): PartBuilder {
     at(0, NOZZLE.y, NOZZLE.z - 0.06),
   );
 
-  // Steering pod with the display; the bars are a separate (animated) group.
+  // Steering pod; the bars are a separate (animated) group.
   const pod: SuperSection[] = [];
   const np = lod === 0 ? 8 : 4;
   for (let k = 0; k <= np; k++) {
@@ -300,8 +299,6 @@ function structure(lines: HullLines, lod: number): PartBuilder {
   }
   b.addData('deckPaint', sculpt(pod, lod === 0 ? 20 : 10, { capStart: true, capEnd: true }));
   if (lod < 2) {
-    b.add(SLOTS.black, bevelBox(0.24, 0.14, 0.03, 0.012), at(0, 0.8, -0.38, -0.9));
-    b.add(SLOTS.screen, atlasPlane(0.2, 0.1, [0.68, 0.45], [0.99, 0.95]), at(0, 0.8, -0.364, -0.9));
     // Visor.
     const v0: V3[] = [];
     const v1: V3[] = [];
